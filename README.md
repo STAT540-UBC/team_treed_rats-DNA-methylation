@@ -4,7 +4,7 @@ This is the repo for group project of **TEAM TREED**
 
 Our team members are: 
 
-Name     | Github ID 
+Github ID |  Name
 ---------|------------
 @RashedHUBC |	Rashed Hoque (Statistics)
 @emminic93 |	Emma Titmuss (Genome Science and Tech)

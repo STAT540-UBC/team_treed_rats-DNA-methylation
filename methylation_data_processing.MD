@@ -7,12 +7,12 @@
 | SRR1810939 | male3      |
 | SRR1810938 | male2      |
 | SRR1810937 | male1      |
-| SRR1810936 | estradiol3 |
+| SRR1810932 | female3    |
 | SRR1810931 | female2    |
 | SRR1810930 | female1    |
+| SRR1810936 | estradiol3 |
 | SRR1810934 | estradiol2 |
 | SRR1810933 | estradiol1 |
-| SRR1810932 | female3    |
 
 2. Downloaded bismark v 0.14.5 - http://www.bioinformatics.babraham.ac.uk/projects/bismark/
 3. Downloaded rattus_norvegicus genome from Ensemble - ftp://ftp.ensembl.org/pub/release-83/fasta/rattus_norvegicus/dna/

@@ -1,4 +1,4 @@
-# team_treed_rats-DNA-methylation
+This is the private repository of team **TREED** for their group project as part of STAT 540/ BIOF 540/ GSAT 540.
 
 **Epigenetic Determinants of Gender in Rats**
 ==============================================
@@ -9,10 +9,10 @@ Our team members are:
 
 Github ID |  Name
 ---------|------------
-[@RashedHUBC](https://github.com/RashedHUBC) |	Rashed Hoque (MSc, Statistics)
+[@hui-tony-zk](https://github.com/hui-tony-zk) | Tony Hui (MSc, Genome Science and Tech - Bioinformatics)
+[@RashedHUBC](https://github.com/RashedHUBC) |	Md. Rashedul Hoque (MSc, Bio-tatistics)
 [@emminic93](https://github.com/emminic93) |	Emma Titmuss (MSc, Genome Science and Tech)
 [@eclaks](https://github.com/eclaks) | Emma Laks (MSc, Genome Science and Tech)
-[@hui-tony-zk](https://github.com/hui-tony-zk) | Tony Hui (MSc, Genome Science and Tech - Bioinformatics)
 [@david-rattray](https://github.com/David-Rattray) |	David Rattray (MSc, Biochemistry)
 
 

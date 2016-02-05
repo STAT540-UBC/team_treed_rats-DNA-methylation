@@ -71,15 +71,15 @@ lapply(cpg_files, nrow) %>% data.frame() %>% t() %>% data.frame() %>% add_rownam
 ## 
 ##      rowname        .
 ##        (chr)    (int)
-## 1    female1  8924132
-## 2    female2  8703590
-## 3    female3 13634545
-## 4 estradiol1 13813794
-## 5 estradiol2 14180700
-## 6 estradiol3 16629552
-## 7      male1 18060763
-## 8      male2 15175856
-## 9      male3 17691011
+## 1    female1  8922668
+## 2    female2  8702855
+## 3    female3 13632672
+## 4 estradiol1 13811801
+## 5 estradiol2 14178594
+## 6 estradiol3 16619149
+## 7      male1 18058509
+## 8      male2 15173572
+## 9      male3 17688957
 ```
 
 #### Per chromosome per sample
@@ -114,15 +114,15 @@ foreach(i=1:length(cpg_files), .combine = rbind) %dopar%{
 
 ```
 ##    average_Cov     sample
-## 1:    8.824868    female1
-## 2:    2.578682    female2
-## 3:    8.643951    female3
-## 4:    9.084398 estradiol1
-## 5:    8.191324 estradiol2
-## 6:    5.291155 estradiol3
-## 7:    7.437166      male1
-## 8:    7.796569      male2
-## 9:    7.098913      male3
+## 1:    1.409210    female1
+## 2:    1.414381    female2
+## 3:    1.901558    female3
+## 4:    2.013134 estradiol1
+## 5:    2.103462 estradiol2
+## 6:    2.696568 estradiol3
+## 7:    3.191067      male1
+## 8:    2.138167      male2
+## 9:    3.048415      male3
 ```
 
 ### Coverage distribution
@@ -141,7 +141,7 @@ cov_distribution %>%
 ```
 
 ```
-## Warning: Removed 4795 rows containing missing values (geom_path).
+## Warning: Removed 226 rows containing missing values (geom_path).
 ```
 
 ![](1-Methylation_sanity_check_files/figure-html/cov_distribution-1.png)
@@ -161,13 +161,13 @@ foreach(i=1:length(cpg_files), .combine = rbind) %dopar%{
 ##    mean_meth     sample
 ## 1:     0.763    female1
 ## 2:     0.777    female2
-## 3:     0.777    female3
+## 3:     0.776    female3
 ## 4:     0.772 estradiol1
-## 5:     0.777 estradiol2
-## 6:     0.778 estradiol3
+## 5:     0.776 estradiol2
+## 6:     0.777 estradiol3
 ## 7:     0.771      male1
 ## 8:     0.774      male2
-## 9:     0.776      male3
+## 9:     0.775      male3
 ```
 
 Looks like methylation is generally very similar across samples
@@ -206,7 +206,7 @@ pairwise_cor <- cpg_files_merged %>%
 
 diag(pairwise_cor) <- NA
 
-hclust <- hclust(as.dist(pairwise_cor))
+hclust <- hclust(as.dist(1-pairwise_cor))
 
 pheatmap(pairwise_cor, cluster_rows = hclust, cluster_cols = hclust)
 ```

@@ -10,7 +10,7 @@ Our team members are:
 Github ID |  Name
 ---------|------------
 [@hui-tony-zk](https://github.com/hui-tony-zk) | Tony Hui (MSc, Genome Science and Tech - Bioinformatics)
-[@RashedHUBC](https://github.com/RashedHUBC) |	Md. Rashedul Hoque (MSc, Bio-tatistics)
+[@RashedHUBC](https://github.com/RashedHUBC) |	Md. Rashedul Hoque (MSc, Bio-statistics)
 [@emminic93](https://github.com/emminic93) |	Emma Titmuss (MSc, Genome Science and Tech)
 [@eclaks](https://github.com/eclaks) | Emma Laks (MSc, Genome Science and Tech)
 [@david-rattray](https://github.com/David-Rattray) |	David Rattray (MSc, Biochemistry)

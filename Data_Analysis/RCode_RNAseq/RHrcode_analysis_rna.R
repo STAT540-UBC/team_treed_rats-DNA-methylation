@@ -2,7 +2,7 @@
 rm(list=ls())
 
 ###read the merged data
-asd <- read.table(file="merged.txt", header=T)
+asd <- read.table(file="RNAseq_all_merged.txt", header=T)
 head(asd)
 dim(asd)
 str(asd)
@@ -13,7 +13,7 @@ str(asd1)
 head(asd1)
 
 ####read the p-value data
-bdat <- read.table(file = "anova.pval.txt", header = T)
+bdat <- read.table(file = "RHgroups_anova.pval.txt", header = T)
 head(bdat)
 View(bdat)
 
@@ -37,3 +37,6 @@ library(magrittr)
 library(ggplot2)
 
 tbl_anovdat <- tbl_df(bdat1)
+genes.sig <- bdat1$gene.no
+
+sig_anovdat <- bdat1[bdat1$ID %in% facs_samp,]

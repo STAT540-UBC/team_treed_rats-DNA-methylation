@@ -1,0 +1,64 @@
+---
+title: "1-RNA_Seq_sanity_checks"
+author: "Emma"
+date: "10 February 2016"
+output: 
+  html_document: 
+    keep_md: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+**Processing RNA Seq Data and Sanity Checks**
+================================================
+
+**Load Libraries**
+-------------------
+
+```{r eval = FALSE}
+require(ggplot2)
+require(data.table)
+require(knitr)
+```
+
+**Import Data**
+----------------
+
+```{r}
+row.merged <- read.table("C:/Users/Emma/Documents/Masters/STAT540/team_treed_rats-DNA-methylation/RNASeq_data/row.merged.txt", header=TRUE, row.names = 1)
+```
+
+The data (rnadata) is arranged in the following table, displaying the gene, rpkm value, as well as the group and replication it belongs to - that is, for example, female vehicle 1, or female z 1. 
+```{r}
+head(row.merged)
+```
+
+Another data set was made (rpkmlog) with the same data but with log2 rpkm values, as this may be useful for some plots.
+
+**Taking a peek at the data**
+------------------------------
+
+Getting a summary of the data set shows that there are 88,548 genes for each of the groups; FVEH, FZEB, MVEH, MZEB. This is good as each of the replicates should have 1/3 of this - 29,516 as expected! 
+```{r}
+summary(row.merged)
+```
+
+Looking at the rpkm values of the genes as a whole, there are a LOT that have a value of 0. Is this bad? Shouldn't every gene have some expression?  
+
+```{r}
+test <- subset(row.merged, rpkm_value == 0)
+summary(test)
+```
+
+It also needs to be checked for each group, how many have a readout of 0, as this may cause some problems / bias.
+
+The mean RPKM values for each of the gene sets are roughly the same. Again, is this good? 
+
+```{r}
+meanrpkms <- aggregate(row.merged[, 2], list(row.merged$group.fct), mean)
+meanrpkms
+```
+
+

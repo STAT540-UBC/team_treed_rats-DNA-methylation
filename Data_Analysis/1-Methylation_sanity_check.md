@@ -16,6 +16,7 @@ require(dplyr)
 require(ggplot2)
 require(pheatmap)
 # setwd("Data_Analysis")
+registerDoMC(9)
 ```
 
 ## Load data
@@ -95,13 +96,7 @@ lapply(cpg_files_merged, nrow) %>% data.frame() %>% t() %>% data.frame() %>% add
 cpg_per_chrom_per_sample <- foreach(i=1:length(cpg_files_merged), .combine = rbind) %dopar%{
   cpg_files_merged[[i]] %>% group_by(chr) %>% tally() %>% mutate(sample = names(cpg_files_merged)[i])
 } 
-```
 
-```
-## Warning: executing %dopar% sequentially: no parallel backend registered
-```
-
-```r
 cpg_per_chrom_per_sample %>% 
   mutate(facet = gsub("[1-3]", "", sample),
          chr = factor(chr, levels = paste0("chr", c(1:20, "X", "Y")))) %>%
@@ -120,79 +115,15 @@ Well that sucks. Looks like the female libraries have less reads overall. Luckil
 
 ```r
 foreach(i=1:length(cpg_files_merged), .combine = rbind) %dopar%{
-  cpg_files_merged[[i]] %>% summarize(average_Cov = sum(cov)/n()) %>% mutate(sample = names(cpg_files_merged)[i])
+  cpg_files_merged[[i]] %>% ungroup() %>% summarize(average_Cov = sum(cov)/n()) %>% mutate(sample = names(cpg_files_merged)[i])
 } %>% arrange(sample)
 ```
 
 ```
-##       chr average_Cov    sample
-##  1:  chr1    5.476094 estradiol
-##  2: chr10    5.736801 estradiol
-##  3: chr11    5.023292 estradiol
-##  4: chr12    6.004234 estradiol
-##  5: chr13    5.199681 estradiol
-##  6: chr14    5.142296 estradiol
-##  7: chr15    5.050131 estradiol
-##  8: chr16    5.331243 estradiol
-##  9: chr17    5.288710 estradiol
-## 10: chr18    5.175203 estradiol
-## 11: chr19    5.711336 estradiol
-## 12:  chr2    4.874629 estradiol
-## 13: chr20    5.562254 estradiol
-## 14:  chr3    5.400609 estradiol
-## 15:  chr4    5.161965 estradiol
-## 16:  chr5    5.397723 estradiol
-## 17:  chr6    5.256861 estradiol
-## 18:  chr7    5.418862 estradiol
-## 19:  chr8    5.423918 estradiol
-## 20:  chr9    5.219304 estradiol
-## 21:  chrX    4.524123 estradiol
-## 22:  chrY    1.300971 estradiol
-## 23:  chr1    3.390722    female
-## 24: chr10    3.471091    female
-## 25: chr11    3.152111    female
-## 26: chr12    3.563584    female
-## 27: chr13    3.242084    female
-## 28: chr14    3.216801    female
-## 29: chr15    3.173796    female
-## 30: chr16    3.300844    female
-## 31: chr17    3.284080    female
-## 32: chr18    3.219313    female
-## 33: chr19    3.482373    female
-## 34:  chr2    3.091982    female
-## 35: chr20    3.381829    female
-## 36:  chr3    3.329683    female
-## 37:  chr4    3.225020    female
-## 38:  chr5    3.310127    female
-## 39:  chr6    3.272852    female
-## 40:  chr7    3.331780    female
-## 41:  chr8    3.336972    female
-## 42:  chr9    3.262578    female
-## 43:  chrX    2.925713    female
-## 44:  chrY    1.344633    female
-## 45:  chr1    7.439010      male
-## 46: chr10    7.774309      male
-## 47: chr11    6.817459      male
-## 48: chr12    7.978227      male
-## 49: chr13    7.047682      male
-## 50: chr14    6.981192      male
-## 51: chr15    6.891583      male
-## 52: chr16    7.246655      male
-## 53: chr17    7.237178      male
-## 54: chr18    7.080687      male
-## 55: chr19    7.758012      male
-## 56:  chr2    6.658024      male
-## 57: chr20    7.439348      male
-## 58:  chr3    7.347554      male
-## 59:  chr4    7.039484      male
-## 60:  chr5    7.274793      male
-## 61:  chr6    7.173864      male
-## 62:  chr7    7.302060      male
-## 63:  chr8    7.403394      male
-## 64:  chr9    7.137286      male
-## 65:  chrX    3.583729      male
-## 66:  chrY    1.533679      male
-##       chr average_Cov    sample
+##    average_Cov    sample
+## 1:    5.304188 estradiol
+## 2:    3.287158    female
+## 3:    7.130281      male
 ```
 
 ### Coverage distribution
@@ -298,14 +229,12 @@ diag(pairwise_cor) <- 1
 
 hclust <- hclust(as.dist(1-pairwise_cor))
 
-pheatmap(pairwise_cor, cluster_rows = hclust, cluster_cols = hclust)
+pheatmap(pairwise_cor, cluster_rows = hclust, cluster_cols = hclust, display_numbers = T)
 ```
 
 ![](1-Methylation_sanity_check_files/figure-html/pairwise_cor-1.png)
 
-Holy crap, the correlation values are atrocious. We might need to increase coverage by pooling replicates.
-
-At least male and estradiol are clustering together.
+Correlations look much better now
 
 
 

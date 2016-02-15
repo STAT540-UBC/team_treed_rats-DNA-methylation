@@ -17,17 +17,18 @@ rpkmlog <- row.merged
 rpkmlog[, 2] <- log(rpkmlog[2], 2)
 
 ## Analyzing row.merged for no expression values
-test <- subset(row.merged, rpkm_value == 0)
-summary(test)
+rpkm.null <- subset(row.merged, rpkm_value == 0)
+summary(rpkm.null)
 
-## data frame "test" contains all gene observations with no expression
-test.sorted  <- test[ order(test[,1], test[,5]),]
+## data frame "rpkm.null" contains all gene observations with no expression
+rpkm.null  <- rpkm.null[ order(rpkm.null[,1], rpkm.null[,5]),]
 
 ## Organized by genes by group and the frequency they occur, then subsetted freq=3
-test.summary <- table(test[, c('genes', 'group.fct')], useNA='ifany')
-test.freq <- as.data.frame(test.summary)
-test.freq3 <- subset(test.freq, Freq==3)
+rpkm.summary <- table(rpkm.null[, c('genes', 'group.fct')], useNA='ifany')
+rpkm.freq <- as.data.frame(rpkm.summary)
+rpkm.freq <- subset(rpkm.freq, Freq==3)
 
 ## perhaps before here, need to setup so that the gene is followed by columns of its freq
 ## for each group condition for easier comparison
+rpkm.comp <- dcast(rpkm.null, genes~group.fct)
 

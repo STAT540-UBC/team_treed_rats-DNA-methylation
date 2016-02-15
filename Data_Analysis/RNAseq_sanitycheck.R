@@ -23,4 +23,11 @@ summary(test)
 ## data frame "test" contains all gene observations with no expression
 test.sorted  <- test[ order(test[,1], test[,5]),]
 
-## Organize by group??
+## Organized by genes by group and the frequency they occur, then subsetted freq=3
+test.summary <- table(test[, c('genes', 'group.fct')], useNA='ifany')
+test.freq <- as.data.frame(test.summary)
+test.freq3 <- subset(test.freq, Freq==3)
+
+## perhaps before here, need to setup so that the gene is followed by columns of its freq
+## for each group condition for easier comparison
+

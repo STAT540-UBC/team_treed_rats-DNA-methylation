@@ -2,8 +2,21 @@
 Rashed  
 February 24, 2016  
 
+# Steps to find out differentially expressed genes using `NOISeq` package in `R`
+
+The analysis pipeline consists of the following steps.
+
+ 1. Data preparation and import data to make `NOISeq` object
+ 2. Checking Quality control of the data (Check for bias and quality control report)
+ 3. Normalization of the raw read counts
+ 4. Filtering (basically low read counts need to be filtered out)
+ 5. Finding the differentially expressed features/genes using one of the three analysis which suits best
+
 # Data preparation for comparing male and female vehicle
 
+`NOISeq` requires two pieces of information to work that must be provided to the readData function: the expression data (data) and the factors defining the experimental groups to be studied or compared (factors). However, in order to perform the quality control of the data or normalize them, other additional annotations need to be provided such as the feature length, the GC content, the biological classification of the features (e.g. Ensembl biotypes), or the chromosome position of each feature. 
+
+The expression data must be provided in a matrix or a `data.frame` `R` object, having as many rows as the number of features to be studied and as many columns as the number of samples in the experiment. The expression data can be both read counts or normalized expression data such as RPKM values, and also any other normalized expression values.
 
 
 ```r
@@ -122,8 +135,11 @@ dim(countsfm)
 ## [1] 29516     6
 ```
 
+Factors are the variables indicating the experimental group for each sample. They must be given to the `readData` function in a data frame object. This data frame must have as many rows as samples (columns in data object) and as many columns or factors as different sample annotations the user wants to use. Be careful here, the order of the elements of the factor must coincide with the order of the samples (columns) in the expression data file provided.
 
-## Import data to make `NOISeq object`
+## Import data to make `NOISeq` object
+
+Once we have created in `R` the count data matrix, the data frame for the factors we have to pack all this information into a `NOISeq` object by using the readData function. An example on how it works is shown below. It is noted the rows with zero counts in all samples are deleted. These have no impact on the analysis.
 
 
 ```r
@@ -241,7 +257,9 @@ datafm
 ```
 
 
-##check the infirnation included
+##check the information included
+
+Data created is checked here. 
 
 
 ```r
@@ -268,7 +286,7 @@ str(datafm)
 ##   .. .. .. .. ..@ .Data:List of 2
 ##   .. .. .. .. .. ..$ : int [1:3] 1 0 0
 ##   .. .. .. .. .. ..$ : int [1:3] 1 1 0
-##   ..@ assayData        :<environment: 0x000000001bf9c020> 
+##   ..@ assayData        :<environment: 0x000000001ab0aaa0> 
 ##   ..@ phenoData        :Formal class 'AnnotatedDataFrame' [package "Biobase"] with 4 slots
 ##   .. .. ..@ varMetadata      :'data.frame':	3 obs. of  1 variable:
 ##   .. .. .. ..$ labelDescription: chr [1:3] NA NA NA
@@ -357,7 +375,12 @@ head(featureData(datafm)@data)
 
 #Checking Quality control of the data
 
+Data processing and sequencing experiment design in RNA-seq are not straightforward. Therefore, once the expression levels (read counts) have been obtained, it is absolutely necessary to be able
+to detect potential biases or contamination before proceeding with further analysis (e.g. differential expression). The technology biases, such as the transcript length, GC content, PCR artifacts, uneven transcript read coverage, contamination by off-target transcripts or big differences in transcript distributions, are factors that interfere in the linear relationship between transcript abundance and the number of mapped reads at a gene locus (counts). These all are not relevent here!!!
+
 ##Some exploratory plot
+
+There are several types of exploratory plots that can be obtained. They will be described in detail in the following sections. To generate any of these plots, first of all, `dat `function must be applied on the input data (`NOISeq` object) to obtain the information to be plotted. The user must specify the type of plot the data are to be computed for (argument type). Once the data for the plot have been generated with dat function, the plot will be drawn with the `explo.plot` function. 
 
 
 ```r
@@ -398,6 +421,8 @@ explo.plot(countsplo, toplot = 1, samples =NULL, plottype = "barplot")
 #showing number of features with low counts for each samples 
 ```
 
+Features with low counts are, in general, less reliable and may introduce noise in the data that makes more difficult to extract the relevant information, for instance, the differentially expressed features. The “Sensitivity plot” in above figure helps to decide the threshold to remove low-count features by indicating the proportion of such features that are present in our data. In this plot, the bars show the percentage of features within each sample having more than 0 counts
+per million (CPM), or more than 1, 2, 5 and 10 CPM. The horizontal lines are the corresponding percentage of features with those CPM in at least one of the samples (or experimental conditions if the factor parameter is not NULL). 
 
 ##Bias things
 
@@ -415,7 +440,15 @@ explo.plot(countsplo, toplot = 1, samples =NULL, plottype = "barplot")
 #explo.plot(lengthbiasfm, samples = NULL, toplot = "global")
 #show(lengthbiasfm)
 #can't run as we haven't the feature length
+```
 
+##RNA composition
+
+When two samples have different RNA composition, the distribution of sequencing reads across the features is different in such a way that although a feature had the same number of read counts in both samples, it would not mean that it was equally expressed in both. To check if this bias is present in the data, the “cd” plot and the correponding diagnostic test can be used. In this case, each sample s is compared to the reference sample r (which can be arbitrarily chosen). To do that, M values are computed as $log2(counts_{s} = counts_{r})$. If no bias is present, it should be expected that the median of M values for each comparison is 0. Otherwise, it would
+be indicating that expression levels in one of the samples tend to be higher than in the other, and this could lead to false discoveries when computing differencial expression. Confidence intervals for the M median are also computed by bootstrapping. If value 0 does not fall inside the interval, it means that the deviation of the sample with regard to the reference sample is statistically significant. It must be indicated if the data provided are already normalized (`norm=TRUE`) or not (`norm=FALSE`). The reference sample may be indicated with the `refColumn` parameter (by default, the first column is used). Additional plot parameters may also be used to modify some aspects of the plot.
+
+
+```r
 ####RNA composition
 
 ###to check bias cd plot is used
@@ -427,11 +460,11 @@ fmcd <- dat(datafm, type = "cd", norm = TRUE, refColumn = 1)
 ## [1] "Reference sample is: GSM1616876_FVEH_3_1"
 ## [1] "Confidence intervals for median of M:"
 ##                     0.5%                  99.5%                 
-## GSM1616877_FVEH_5_1 "-0.0220429435085717" "-0.00996948991904702"
+## GSM1616877_FVEH_5_1 "-0.022044048090951"  "-0.00886708869880138"
 ## GSM1616878_FVEH_6_1 "0"                   "0"                   
-## GSM1616882_MVEH_1_1 "-0.0103284811686607" "-0.00215041278825574"
+## GSM1616882_MVEH_1_1 "-0.0111537449554959" "-0.00181995695582304"
 ## GSM1616883_MVEH_3_1 "0"                   "0"                   
-## GSM1616884_MVEH_6_1 "-0.0159686588878626" "-0.00587951340139591"
+## GSM1616884_MVEH_6_1 "-0.0163264480109416" "-0.00553472287833137"
 ##                     Diagnostic Test
 ## GSM1616877_FVEH_5_1 "FAILED"       
 ## GSM1616878_FVEH_6_1 "PASSED"       
@@ -445,7 +478,12 @@ fmcd <- dat(datafm, type = "cd", norm = TRUE, refColumn = 1)
 explo.plot(fmcd)
 ```
 
-![](1-RNA_Seq_differential__expression_files/figure-html/ch15-1.png)<!-- -->
+![](1-RNA_Seq_differential__expression_files/figure-html/ch152-1.png)<!-- -->
+
+##Batch effect exploration
+
+One of the techniques that can be used to visualize if the experimental samples are clustered according to the experimental design or if there is an unwanted source of noise in the data that hampers this clustering is the Principal Component Analysis (PCA). Now we can run the following code to plot the samples scores for the two principal components of the PCA and color them by the factor “Vehicle”. 
+
 
 ```r
 ###pca plot
@@ -454,9 +492,12 @@ fmPCA = dat(datafm, type = "PCA")
 explo.plot(fmPCA, factor = "Vehicle")
 ```
 
-![](1-RNA_Seq_differential__expression_files/figure-html/ch15-2.png)<!-- -->
+![](1-RNA_Seq_differential__expression_files/figure-html/ch153-1.png)<!-- -->
+
 
 ## QC report
+
+The QCreport function allows the user to quickly generate a pdf report showing the exploratory plots described in this section to compare either two samples (if `factor=NULL`) or two experimental conditions (if factor is indicated). Depending on the biological information provided (biotypes, length or GC content), the number of plots included in the report may differ.
 
 
 ```r
@@ -471,11 +512,11 @@ QCreport(datafm, samples = NULL, factor = "Vehicle", norm = TRUE)
 ## [1] "Reference sample is: GSM1616876_FVEH_3_1"
 ## [1] "Confidence intervals for median of M:"
 ##                     0.5%                  99.5%                 
-## GSM1616877_FVEH_5_1 "-0.0225545118965709" "-0.00997011120799541"
+## GSM1616877_FVEH_5_1 "-0.0225681415831053" "-0.00972049108294082"
 ## GSM1616878_FVEH_6_1 "0"                   "0"                   
-## GSM1616882_MVEH_1_1 "-0.0109421298138519" "-0.00214919995782814"
+## GSM1616882_MVEH_1_1 "-0.0107808790059358" "-0.00158324568030123"
 ## GSM1616883_MVEH_3_1 "0"                   "0"                   
-## GSM1616884_MVEH_6_1 "-0.0158204539854179" "-0.00557713735762736"
+## GSM1616884_MVEH_6_1 "-0.0166596608185872" "-0.00524771807869097"
 ##                     Diagnostic Test
 ## GSM1616877_FVEH_5_1 "FAILED"       
 ## GSM1616878_FVEH_6_1 "PASSED"       
@@ -495,6 +536,7 @@ QCreport(datafm, samples = NULL, factor = "Vehicle", norm = TRUE)
 #result shows normalization is required to correct for bias....confused!!!
 ```
 
+This report can be generated before normalizing the data (`norm = FALSE`) or after normalization to check if unwanted effects were corrected (`norm = TRUE`). Please note that the data are log-transformed when computing Principal Component Analysis (PCA).
 
 #Normalization
 
@@ -507,15 +549,17 @@ QCreport(datafm, samples = NULL, factor = "Vehicle", norm = TRUE)
 
 # Low-count Filtering
 
+Excluding features with low counts improves, in general, differential expression results, no matter the method being used, since noise in the data is reduced. However, the best procedure to filter these low count features has not been yet decided nor implemented in the differential expression packages. `NOISeq` includes three methods to filter out features with low counts:
+
+ 1. **CPM** (method 1): The user chooses a value for the parameter counts per million (CPM) in a sample under which a feature is considered to have low counts. The cutoff for a condition with $s$ samples is $CPM × s$. Features with sum of expression values below the condition cutoff in all conditions are removed. Also a cutoff for the coefficient of variation (in percentage) per condition may be established to eliminate features with inconsistent expression values.
+ 2. **Wilcoxon test** (method 2): For each feature and condition, $H_{0} : m = 0$ is tested versus $H_{1} : m > 0$, where $m$ is the median of counts per condition. Features with $p-value > 0.05$ in all conditions are filtered out. P-values can be corrected for multiple testing using the $p.adj$ option. This method is only recommended when the number of replicates per condition is at least 5.
+ 3. **Proportion test** (method 3): Similar procedure to the Wilcoxon test but testing $H_{0} : p = p_{0}$ versus $H_{1} : p > p_{0}$, where p is the feature relative expression and $p_{0} = CPM/10^{6}$. Features with $p-value > 0.05$ in all conditions are filtered out. P-values can be corrected for multiple testing using the $p.adj$ option. 
+ 
+The first method is displayed here as we can't apply the other two due to lack of information. 
+
 
 ```r
 ###Low-count filtering
-#Excluding features with low counts improves, in general, differential expression results, 
-#no matter the method being used, since noise in the data is reduced.
-
-#NOISeq includes three methods to filter out features with low counts: 1. CPM 2. Wilcoxon test 
-#3. Proportion test
-
 ##Using CPM
 fmfilt <- filtered.data(countsfmnz, factor = factorsfm$Vehicle, norm = TRUE, 
                        depth = NULL, method = 1, cv.cutoff = 100, cpm = 1, p.adj = "fdr")
@@ -538,7 +582,24 @@ fmfilt <- filtered.data(countsfmnz, factor = factorsfm$Vehicle, norm = TRUE,
 
 #Differential Expression
 
+The `NOISeq` package computes differential expression between two experimental conditions given the expression level of the considered features. The package includes two non-parametric approaches for differential expression analysis: `NOISeq` for technical replicates or no replication at all, and `NOISeqBIO`, which is optimized for the use of biological replicates. Both methods take read counts from RNA-seq as the expression values, in addition to previously normalized data and read counts from other NGS technologies. 
+
+However, when using `NOISeq` or `NOISeqBIO` to compute differential expression, it is not necessary to normalize or filter low counts before applying these methods because they include these options. Thus, normalization can be done automatically by choosing the corresponding value for the parameter `norm`. If the data have been previously normalized, norm parameter must be set to “n”. Regarding the low-count filtering, it is not necessary to filter in `NOISeq` method. In contrast, it is recommended to do it in NOISeqBIO, which by default filters out low-count features with CPM method (`filter=1`).
+
 ##Several possible options
+
+`NOISeq` method was designed to compute differential expression on data with technical replicates (NOISeq-real) or no replicates at all (NOISeq-sim). 
+
+###Description of the process in general
+
+ - If there are technical replicates available, it summarizes them by summing up them. It is also possible to apply this method on biological replicates, that are averaged instead of summed. However, for biological replicates `NOISeqBIO` are recommended. 
+ - `NOISeq` computes the following differential expression statistics for each feature: M (which is the log2-ratio of the two conditions) and D (the value of the difference between conditions).
+ - Expression levels equal to 0 are replaced with the given constant $k > 0$, in order to avoid infinite or undetermined M-values. If $k = NULL$, the 0 is replaced by the midpoint between 0 and the next non-zero value in the expression matrix. 
+ - A feature is considered to be differentially expressed if its corresponding M and D values are likely to be higher than in noise. Noise distribution is obtained by comparing all pairs of replicates within the same condition. The corresponding M and D values are pooled together to generate the distribution. Changes in expression between conditions with the same magnitude than changes in expression between replicates within the same condition should not be considered as differential expression. 
+ - Thus, by comparing the (M, D) values of a given feature against the noise distribution, `NOISeq` obtains the “probability of differential expression” for this feature. If the odds $Pr(differential expression)/Pr(non-differential expression)$ are higher than a given threshold, the feature is considered to be differentially expressed between conditions. For instance, an odds value of 4:1 is equivalent to $q = Pr(differential expression) = 0.8$ and it means that the feature is 4 times more likely to be differentially expressed than non-differentially expressed.
+ - The `NOISeq` algorithm compares replicates within the same condition to estimate noise distribution (`NOISeq-real`). 
+ - When no replicates are available, `NOISeq-sim` simulates technical replicates in order to estimate the differential expression probability. 
+ - `NOISeqBIO` is optimized for the use on biological replicates (at least 2 per condition). It was developed by joining the philosophy of our previous work together with the ideas from *Efron et al.*. In our case, we defined the differential expression statistic $\theta$ as $(M + D)/2$, where M and D are the statistics defined in the previous sectionbut including a correction for the biological variability of the corresponding feature.
 
 
 ```r
@@ -666,10 +727,11 @@ fmnoiseqbio <- noiseqbio(datafm, k = 0.5, norm = "n", factor = "Vehicle",
 ##   0.000   0.112   0.388   0.376   0.646   1.000    8071
 ```
 
+The output `fmnoiseq1@results[[1]]$prob` gives the estimated probability of differential expression for each feature. Note that when using NOISeq, these probabilities are not equivalent to p-values. The higher the probability, the more likely that the difference in expression is due to the change in the experimental condition and not to chance. 
 
 ##Select the differentially expressed features/genes
 
-Please remember that, when using `NOISeq`, the probability of differential expression is not equivalent to 1 − pvalue. We recommend for q to use values around 0.8. However, when using `NOISeqBIO`, the probability of differential expression would be equivalent to 1 − F DR, where FDR can be considered as an adjusted p-value. Hence, in this case, it would be more convenient to use q = 0.95. With the argument M we choose if we want all the differentially expressed features, only the differentially expressed features that are more expressed in condition 1 than in condition 2 (M = “up”) or only the differentially expressed features that are under-expressed
+Once we have obtained the differential expression probability for each one of the features by using `NOISeq` or `NOISeqBIO` function, we may want to select the differentially expressed features for a given threshold q. This can be done with degenes function on the “output” object using the parameter q.With the argument M we choose if we want all the differentially expressed features, only the differentially expressed features that are more expressed in condition 1 than in condition 2 (M = “up”) or only the differentially expressed features that are under-expressed
 in condition 1 with regard to condition 2 (M = “down”):
 
 
@@ -744,6 +806,10 @@ fmnoiseqbio.deg2 <- degenes(fmnoiseqbio, q = 0.95, M = "down")
 ```
 ## [1] "1 differentially expressed features (down in first condition)"
 ```
+
+Please remember that, when using `NOISeq`, the probability of differential expression is not equivalent to 1 − pvalue. We recommend for q to use values around 0.8. However, when using `NOISeqBIO`, the probability of differential expression would be equivalent to 1 − FDR, where FDR can be considered as an adjusted p-value. Hence, in this case, it would be more convenient to use q = 0.95. 
+
+#Comments
 
 I am confused at the output found!!! Seems too less differential genes. 
 

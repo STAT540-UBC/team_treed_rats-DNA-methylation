@@ -1,0 +1,114 @@
+---
+title: "2-Calling_DMRs.Rmd"
+author: "Tony"
+date: "February 18, 2016"
+output: html_document
+---
+
+```{r}
+require(data.table)
+require(foreach)
+require(doMC)
+require(bsseq)
+require(ggplot2)
+require(dplyr)
+```
+
+```{r data_preprocessing, echo=FALSE, eval=FALSE}
+load("../methylation_data/cpg_files_merged.RData")
+
+bssmooth_cpgs <- lapply(cpg_files_merged, function(x) {
+  tmp <- x %>% select(chr, pos) %>% filter(pos >0)
+}) %>% rbindlist() %>% unique
+
+registerDoMC(length(cpg_files_merged))
+bssmooth <- foreach(f=names(cpg_files_merged), .combine = cbind) %dopar% {
+  tmp <- cpg_files_merged[[f]] %>% setnames(c("chr", "pos", paste0(f, "_meth"), paste0(f, "_cov"))) %>% data.table()
+  left_join(bssmooth_cpgs, tmp, by = c("chr","pos")) %>% select(-chr,-pos)
+} %>% cbind(bssmooth_cpgs, .)
+
+bssmooth[is.na(bssmooth)] <- 0
+
+samples <- names(cpg_files_merged)
+
+rm(bssmooth_cpgs)
+
+bssmooth_smooth <- BSseq(chr = bssmooth$chr, pos = bssmooth$pos, 
+                         M = bssmooth %>% select(contains("meth")) %>% as.matrix(), 
+                         Cov = bssmooth %>% select(contains("cov")) %>% as.matrix(),
+                         sampleNames = samples)
+
+chroms <- granges(bssmooth_smooth) %>% seqnames %>% levels
+
+# rm(bssmooth)
+
+bssmooth_smooth <- BSmooth(bssmooth_smooth, verbose = TRUE, parallelBy = "chromosome", mc.cores = length(chroms))
+
+pData(bssmooth_smooth)$col <- c("#7fc97f","#beaed4","#fdc086")
+
+save(... = bssmooth_smooth, file = "../methylation_data/bssmooth_smooth.RData", compress = T)
+```
+
+```{r load_data}
+load("/projects/epigenomics/users/thui/stat540/methylation_data/bssmooth_smooth.RData")
+```
+
+```{r samples}
+samples <- pData(bssmooth_smooth) %>% rownames
+
+bssmooth_dt <- cbind(
+  as.data.frame(granges(bssmooth_smooth)) %>% setnames(colnames(.[1]), "chr"),
+  getMeth(bssmooth_smooth) %>% as.data.frame() %>% setnames(paste0(samples, "_meth")),
+  getCoverage(bssmooth_smooth) %>% as.data.frame() %>% setnames(paste0(samples, "_cov"))
+) %>% data.table() %>% select(-end, -width, -strand)
+```
+
+```{r male_vs_female}
+bssmooth_dt_maleVsFemale <- bssmooth_dt %>% 
+  select(-contains("estradiol")) %>% 
+  filter(female_cov > 0, male_cov > 0) %>%
+  mutate(diff = female_meth - male_meth)
+```
+
+```{r male_vs_female_plot}
+summary(bssmooth_dt_maleVsFemale$diff)
+diff_quantile <- quantile(x = bssmooth_dt_maleVsFemale$diff, probs = c(0.005, 0.995))
+diff_quantile
+
+ggplot(bssmooth_dt_maleVsFemale, aes(diff)) +
+  geom_density() +
+  geom_vline(xintercept = diff_quantile)
+```
+
+```{r group_CpGs_nearby_and_call_DMR}
+binsize <- 300
+min_cpg <- 3
+
+bssmooth_dt_maleVsFemale_dCPG <- bssmooth_dt_maleVsFemale %>%
+  filter(diff < diff_quantile[1] | diff > diff_quantile[2]) %>%
+  group_by(chr) %>%
+  mutate(dist = c(binsize+1,diff(start)),
+         diff_cumul = c(0,diff(diff))) %>%
+  ungroup() %>% mutate(chr = as.character(chr)) %>%
+  mutate(bin = 1+cumsum(dist > binsize))
+
+bssmooth_dt_maleVsFemale_DMR <- bssmooth_dt_maleVsFemale_dCPG %>%
+  group_by(chr, bin) %>%
+  summarise(start = min(start), end = max(start)+2, 
+            mean_female = mean(female_meth) %>% round(3), 
+            mean_male = mean(male_meth) %>% round(3),
+            num_cpg = n()
+            ) %>%
+  filter(num_cpg > min_cpg)
+```
+
+```{r save_file}
+save(bssmooth_dt_maleVsFemale_DMR, file = "methylation_data/maleVSfemaleDMRs.RData")
+```
+
+```{r, eval=FALSE}
+	R -e '.libPaths("/home/thui/R/x86_64-redhat-linux-gnu-library/3.1");rmarkdown::render(input = "2-Calling_DMRs.Rmd")'
+```
+
+
+

@@ -28,8 +28,7 @@ The analysis pipeline consists of the following steps.
 library(knitr)
 library(rmarkdown)
 library(xtable)
-
-datn <- read.table(file="RNASeq_data/RNAseq_all_merged.txt", 
+datn <- read.table(file="C:/Users/Rashed/Documents/all_github/team_treed_rats-DNA-methylation/RNASeq_data/RNAseq_all_merged.txt", 
                    header = TRUE)
 rownames(datn) <- datn$genes
 datn <- datn[,c(2:14)]

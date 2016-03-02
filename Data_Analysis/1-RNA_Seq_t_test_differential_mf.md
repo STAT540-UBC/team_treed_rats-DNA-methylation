@@ -577,6 +577,35 @@ dim(sig.fvmv2)
 
 
 
+```r
+tmp1 <- countsfmnz[rownames(countsfmnz) == "ENSRNOG00000037911",]
+require(tidyr)
+tmp <- countsfmnz %>% select(1:6) %>%
+  add_rownames(var = "gene") %>%
+  gather(key = sample, value = RPKM, -gene) %>%
+  mutate(group = ifelse(grepl("FVEH", sample), "female", "male")) %>%
+  select(-sample)
+
+tmp_test <- tmp %>%
+  group_by(gene) %>%
+  mutate(pvalue = t.test(RPKM[group == "female"], RPKM[group == "male"], var.equal = F)$p.value)
+head(tmp_test)
+```
+
+```
+## Source: local data frame [6 x 4]
+## Groups: gene [6]
+## 
+##                 gene       RPKM  group    pvalue
+##                (chr)      (dbl)  (chr)     (dbl)
+## 1 ENSRNOG00000000001  0.3067553 female 0.9328402
+## 2 ENSRNOG00000000007 76.5608522 female 0.9328402
+## 3 ENSRNOG00000000008  0.0557963 female 0.9328402
+## 4 ENSRNOG00000000009  0.2127083 female 0.9328402
+## 5 ENSRNOG00000000010  7.3180708 female 0.9328402
+## 6 ENSRNOG00000000012  0.5348094 female 0.9328402
+```
+
 #Comments
 
 I am confused at the output found!!! Results after adjusting for multiple comparisons seem horrible for differentially expressed genes. No differentially expressed genes are found!!! 

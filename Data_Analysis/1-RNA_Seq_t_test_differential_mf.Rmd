@@ -233,6 +233,20 @@ dim(sig.fvmv2)
 ```
 
 
+```{r tony_ttest_code}
+tmp1 <- countsfmnz[rownames(countsfmnz) == "ENSRNOG00000037911",]
+require(tidyr)
+tmp <- countsfmnz %>% select(1:6) %>%
+  add_rownames(var = "gene") %>%
+  gather(key = sample, value = RPKM, -gene) %>%
+  mutate(group = ifelse(grepl("FVEH", sample), "female", "male")) %>%
+  select(-sample)
+
+tmp_test <- tmp %>%
+  group_by(gene) %>%
+  mutate(pvalue = t.test(RPKM[group == "female"], RPKM[group == "male"], var.equal = F)$p.value)
+head(tmp_test)
+```
 
 #Comments
 

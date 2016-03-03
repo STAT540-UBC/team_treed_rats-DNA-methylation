@@ -24,6 +24,7 @@ require(knitr)
 require(dplyr)
 require(reshape)
 require(reshape2)
+require(pheatmap)
 ```
 
 **Import Data**
@@ -150,4 +151,13 @@ allmerged <- merge(mergemf2, FZEB.set)
 head(allmerged)
 ```
 
+```{r}
+matrix <- subset(allmerged, select = 3:14)
+pairwise_cor <- matrix %>%
+   cor(use = "pairwise.complete.obs")
+diag(pairwise_cor) <- 1
+pheatmap(pairwise_cor, cluster_rows = F, cluster_cols = F, display_numbers = T)
+```
+
+Everything is very correlated... Should be redone, taking out the genes that have 0 expression for all 12 samples?
 

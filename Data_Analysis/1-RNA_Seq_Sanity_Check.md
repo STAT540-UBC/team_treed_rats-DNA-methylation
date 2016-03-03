@@ -116,6 +116,14 @@ require(reshape2)
 ##     dcast, melt
 ```
 
+```r
+require(pheatmap)
+```
+
+```
+## Loading required package: pheatmap
+```
+
 **Import Data**
 ----------------
 
@@ -417,4 +425,16 @@ Merge it all into a nice table (allmerged):
 ## 6 101.9832738 80.0663162
 ```
 
+
+```r
+matrix <- subset(allmerged, select = 3:14)
+pairwise_cor <- matrix %>%
+   cor(use = "pairwise.complete.obs")
+diag(pairwise_cor) <- 1
+pheatmap(pairwise_cor, cluster_rows = F, cluster_cols = F, display_numbers = T)
+```
+
+![](1-RNA_Seq_Sanity_Check_files/figure-html/unnamed-chunk-18-1.png)
+
+Everything is very correlated... Should be redone, taking out the genes that have 0 expression for all 12 samples?
 

@@ -17,10 +17,13 @@ knitr::opts_chunk$set(echo = TRUE)
 **Load Libraries**
 -------------------
 
-```{r eval = FALSE}
+```{r}
 require(ggplot2)
 require(data.table)
 require(knitr)
+require(dplyr)
+require(reshape)
+require(reshape2)
 ```
 
 **Import Data**
@@ -59,6 +62,92 @@ The mean RPKM values for each of the gene sets are roughly the same. Again, is t
 ```{r}
 meanrpkms <- aggregate(row.merged[, 2], list(row.merged$group.fct), mean)
 meanrpkms
+```
+
+**Arranging the data into sets of each group** 
+-----------------------------------------------
+
+To take a look at the correlation between each replicate for each group (FVEH etc), subsets were first made. 
+
+```{r}
+FVEH.set <- subset(row.merged, group.fct == "FVEH")
+```
+
+And then rearranged.. 
+```{r}
+FVEH.set <- cast(FVEH.set, gene.no + genes ~ replication, value = "rpkm_value")
+head(FVEH.set)
+```
+
+
+The same was done for each set - FZEB, MZEB and MVEH.
+
+```{r echo = FALSE}
+MVEH.set <- subset(row.merged, group.fct == "MVEH")
+MVEH.set <- cast(MVEH.set, gene.no + genes ~ replication, value = "rpkm_value")
+head(MVEH.set)
+```
+```{r echo = FALSE}
+MZEB.set <- subset(row.merged, group.fct == "MZEB")
+MZEB.set <- cast(MZEB.set, gene.no + genes ~ replication, value = "rpkm_value")
+head(MZEB.set)
+```
+```{r echo=FALSE}
+FZEB.set <- subset(row.merged, group.fct == "FZEB")
+FZEB.set <- cast(FZEB.set, gene.no + genes ~ replication, value = "rpkm_value")
+head(FZEB.set)
+```
+
+Now they can be correlated:
+
+**Female Vehicle**
+
+```{r}
+cor(FVEH.set$"1", FVEH.set$"2")
+cor(FVEH.set$"1", FVEH.set$"3")
+cor(FVEH.set$"2", FVEH.set$"3")
+```
+
+**Male Vehicle**
+
+```{r}
+cor(MVEH.set$"1", MVEH.set$"2")
+cor(MVEH.set$"1", MVEH.set$"3")
+cor(MVEH.set$"2", MVEH.set$"3")
+```
+
+**Male Treated (Zeb)**
+
+```{r}
+cor(MZEB.set$"1", MZEB.set$"2")
+cor(MZEB.set$"1", MZEB.set$"3")
+cor(MZEB.set$"2", MZEB.set$"3")
+```
+
+**Female Treated (Zeb)**
+
+```{r}
+cor(FZEB.set$"1", FZEB.set$"2")
+cor(FZEB.set$"1", FZEB.set$"3")
+cor(FZEB.set$"2", FZEB.set$"3")
+```
+
+The lowest correlations are in Male Vehicle, but at 0.97.. and 0.98... I don't think that's bad! 
+
+```{r eval=TRUE, echo=FALSE}
+names(MVEH.set)[3:5] <- c("MVEH 1", "MVEH 2", "MVEH 3")
+names(FVEH.set)[3:5] <- c("FVEH 1", "FVEH 2", "FVEH 3")
+names(FZEB.set)[3:5] <- c("FZEB 1", "FZEB 2", "FZEB 3")
+names(MZEB.set)[3:5] <- c("MZEB 1", "MZEB 2", "MZEB 3")
+```
+
+Merge it all into a nice table (allmerged): 
+
+```{r echo=FALSE}
+mergemf <- merge(MVEH.set, FVEH.set)
+mergemf2 <- merge(mergemf, MZEB.set)
+allmerged <- merge(mergemf2, FZEB.set)
+head(allmerged)
 ```
 
 

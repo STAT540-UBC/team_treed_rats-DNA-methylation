@@ -159,5 +159,5 @@ diag(pairwise_cor) <- 1
 pheatmap(pairwise_cor, cluster_rows = F, cluster_cols = F, display_numbers = T)
 ```
 
-Everything is very correlated... Should be redone, taking out the genes that have 0 expression for all 12 samples?
+As the heatmap is comparing the mean of all gene expression for each sample, we would expect the correlation between each to be high. 
 

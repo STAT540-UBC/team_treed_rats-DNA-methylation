@@ -436,5 +436,5 @@ pheatmap(pairwise_cor, cluster_rows = F, cluster_cols = F, display_numbers = T)
 
 ![](1-RNA_Seq_Sanity_Check_files/figure-html/unnamed-chunk-18-1.png)
 
-Everything is very correlated... Should be redone, taking out the genes that have 0 expression for all 12 samples?
+As the heatmap is comparing the mean of all gene expression for each sample, we would expect the correlation between each to be high. 
 

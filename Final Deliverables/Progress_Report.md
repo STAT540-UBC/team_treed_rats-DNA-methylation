@@ -12,6 +12,8 @@ As stated in the project proposal, our goals were:
 * Find epigenetically regulated genes that determine gender outcome (by comparing male and female)
 * For each epigenetically regulated gene discovered in (1), determine which are changed by estradiol (testosterone) or DNMT inhibitor.
 
+Task assignments for the project have changed slightly, as we are discovering which areas people prefer to work on and also as the analysis is changing. For instance, we decided we needed to have a better background on gender gene expression in rats so reassigned a few tasks to include this. 
+
 **Tasks completed so far:** 
 
 * Complete sanity checks on [methylation data](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/Data_Analysis/1-Methylation_sanity_check.md).

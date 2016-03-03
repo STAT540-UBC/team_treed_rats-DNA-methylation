@@ -113,7 +113,7 @@ hist(log(countsfm$m.mean), xlab = "mean log RPKM count", main ="male sample")
 
 
 ```{r ch15}
-countsfmnz <- countsfm[countsfm[,8] >= 1 & countsfm[,9] >= 1, ]
+countsfmnz <- countsfm[countsfm[,8] >= 0.01 & countsfm[,9] >= 0.01, ]
 head(countsfmnz)
 #str(countsfmnz)
 dim(countsfmnz)
@@ -222,17 +222,31 @@ diff.exp.fm$pvalue.hb.adj <- round(p.adjust(diff.exp.fm$raw.pvalue, "BY"), 4)
 
 ###checking the genes signifcantly different at 5% level of significance between male anf female
 
-sig.fvmv1 <- diff.exp.fm[diff.exp.fm$pvalue.fdr.adj < 0.05,]
+sig.fvmv1 <- diff.exp.fm[diff.exp.fm$pvalue.fdr.adj < 0.20,]
 dim(sig.fvmv1)
 #View(sig.fvmv1)
 
-sig.fvmv2 <- diff.exp.fm[diff.exp.fm$pvalue.hb.adj < 0.05,]
+sig.fvmv2 <- diff.exp.fm[diff.exp.fm$pvalue.hb.adj < 0.20,]
 dim(sig.fvmv2)
 #View(sig.fvmv2)
 
 ```
 
 
+```{r tony_ttest_code}
+tmp1 <- countsfmnz[rownames(countsfmnz) == "ENSRNOG00000037911",]
+require(tidyr)
+tmp <- countsfmnz %>% select(1:6) %>%
+  add_rownames(var = "gene") %>%
+  gather(key = sample, value = RPKM, -gene) %>%
+  mutate(group = ifelse(grepl("FVEH", sample), "female", "male")) %>%
+  select(-sample)
+
+tmp_test <- tmp %>%
+  group_by(gene) %>%
+  mutate(pvalue = t.test(RPKM[group == "female"], RPKM[group == "male"], var.equal = F)$p.value)
+head(tmp_test)
+```
 
 #Comments
 

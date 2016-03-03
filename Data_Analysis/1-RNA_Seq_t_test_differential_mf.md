@@ -22,9 +22,7 @@ The analysis pipeline consists of the following steps.
 library(knitr)
 library(rmarkdown)
 library(xtable)
-
-datn <- read.table(file=
-                     "C:/Users/Rashed/Documents/all_github/team_treed_rats-DNA-methylation/RNASeq_data/RNAseq_all_merged.txt", 
+datn <- read.table(file="C:/Users/Rashed/Documents/all_github/team_treed_rats-DNA-methylation/RNASeq_data/RNAseq_all_merged.txt", 
                    header = TRUE)
 rownames(datn) <- datn$genes
 datn <- datn[,c(2:14)]
@@ -116,6 +114,67 @@ hist(log(countsfm$GSM1616884_MVEH_6_1), xlab = "log RPKM count", main ="male rep
 ##revised rpkm counts after revision
 ```
 
+
+```r
+require(dplyr)
+```
+
+```
+## Loading required package: dplyr
+```
+
+```
+## 
+## Attaching package: 'dplyr'
+```
+
+```
+## The following objects are masked from 'package:stats':
+## 
+##     filter, lag
+```
+
+```
+## The following objects are masked from 'package:base':
+## 
+##     intersect, setdiff, setequal, union
+```
+
+```r
+require(ggplot2)
+```
+
+```
+## Loading required package: ggplot2
+```
+
+```r
+require(tidyr)
+```
+
+```
+## Loading required package: tidyr
+```
+
+```r
+expression_mf_long <- countsfm %>% 
+  add_rownames() %>%
+  select(-gene.no) %>%
+  gather(key = sample, value = RPKM, ... = -rowname)
+
+expression_mf_long %>%
+  ggplot(aes(RPKM, color = sample)) +
+  geom_density() +
+  scale_x_continuous(trans = "log10") +
+  geom_vline(xintercept = 0.01)
+```
+
+```
+## Warning: Removed 57394 rows containing non-finite values (stat_density).
+```
+
+![](1-RNA_Seq_t_test_differential_mf_files/figure-html/tony_histograms-1.png)<!-- -->
+
 #Compute the mean of rpkm counts over male and female sample and check the distribution of the mean log rpkm counts for male and female
 
 
@@ -192,39 +251,39 @@ hist(log(countsfm$m.mean), xlab = "mean log RPKM count", main ="male sample")
 
 
 ```r
-countsfmnz <- countsfm[countsfm[,8] >= 1 & countsfm[,9] >= 1, ]
+countsfmnz <- countsfm[countsfm[,8] >= 0.01 & countsfm[,9] >= 0.01, ]
 head(countsfmnz)
 ```
 
 ```
 ##                    GSM1616876_FVEH_3_1 GSM1616877_FVEH_5_1
-## ENSRNOG00000000007           76.560852           72.845953
-## ENSRNOG00000000010            7.318071           14.391587
-## ENSRNOG00000000014            1.292220            1.837586
-## ENSRNOG00000000021            8.038146            6.282750
-## ENSRNOG00000000024           11.175178           13.266981
-## ENSRNOG00000000028            1.382465            1.640918
+## ENSRNOG00000000001           0.3067553          0.34937193
+## ENSRNOG00000000007          76.5608522         72.84595259
+## ENSRNOG00000000008           0.0557963          0.01308340
+## ENSRNOG00000000009           0.2127083          0.07980306
+## ENSRNOG00000000010           7.3180708         14.39158730
+## ENSRNOG00000000012           0.5348094          0.68972645
 ##                    GSM1616878_FVEH_6_1 GSM1616882_MVEH_1_1
+## ENSRNOG00000000001           0.2068158           0.2421934
 ## ENSRNOG00000000007          69.4314626          83.3136515
+## ENSRNOG00000000008           0.5595697           0.0000000
+## ENSRNOG00000000009           0.2509657           0.1410698
 ## ENSRNOG00000000010          26.5290822           8.0890022
-## ENSRNOG00000000014           0.3442727           0.4146824
-## ENSRNOG00000000021           7.4405996           7.9819941
-## ENSRNOG00000000024          11.7098678          11.2726827
-## ENSRNOG00000000028           1.8043282           1.4604873
+## ENSRNOG00000000012           0.3943746           0.9606181
 ##                    GSM1616883_MVEH_3_1 GSM1616884_MVEH_6_1 gene.no
-## ENSRNOG00000000007           67.792419           74.789697       2
-## ENSRNOG00000000010           18.300702           14.412526       5
-## ENSRNOG00000000014            1.796318            1.630222       7
-## ENSRNOG00000000021            6.770800            7.861791       9
-## ENSRNOG00000000024           12.037560           12.457588      10
-## ENSRNOG00000000028            1.559198            1.528999      11
-##                      fm.mean    m.mean
-## ENSRNOG00000000007 72.946089 75.298589
-## ENSRNOG00000000010 16.079580 13.600743
-## ENSRNOG00000000014  1.158026  1.280408
-## ENSRNOG00000000021  7.253832  7.538195
-## ENSRNOG00000000024 12.050676 11.922610
-## ENSRNOG00000000028  1.609237  1.516228
+## ENSRNOG00000000001          0.22098735          0.24217070       1
+## ENSRNOG00000000007         67.79241856         74.78969651       2
+## ENSRNOG00000000008          0.02557915          0.02371864       3
+## ENSRNOG00000000009          0.07801088          0.07233670       4
+## ENSRNOG00000000010         18.30070229         14.41252577       5
+## ENSRNOG00000000012          0.98070826          0.79570374       6
+##                       fm.mean      m.mean
+## ENSRNOG00000000001  0.2876477  0.23511715
+## ENSRNOG00000000007 72.9460891 75.29858885
+## ENSRNOG00000000008  0.2094831  0.01643260
+## ENSRNOG00000000009  0.1811590  0.09713913
+## ENSRNOG00000000010 16.0795801 13.60074341
+## ENSRNOG00000000012  0.5396368  0.91234338
 ```
 
 ```r
@@ -233,7 +292,7 @@ dim(countsfmnz)
 ```
 
 ```
-## [1] 14046     9
+## [1] 20319     9
 ```
 
 ```r
@@ -271,33 +330,33 @@ head(countsfmnz)
 
 ```
 ##                    GSM1616876_FVEH_3_1 GSM1616877_FVEH_5_1
-## ENSRNOG00000000007           76.560852           72.845953
-## ENSRNOG00000000010            7.318071           14.391587
-## ENSRNOG00000000014            1.292220            1.837586
-## ENSRNOG00000000021            8.038146            6.282750
-## ENSRNOG00000000024           11.175178           13.266981
-## ENSRNOG00000000028            1.382465            1.640918
+## ENSRNOG00000000001           0.3067553          0.34937193
+## ENSRNOG00000000007          76.5608522         72.84595259
+## ENSRNOG00000000008           0.0557963          0.01308340
+## ENSRNOG00000000009           0.2127083          0.07980306
+## ENSRNOG00000000010           7.3180708         14.39158730
+## ENSRNOG00000000012           0.5348094          0.68972645
 ##                    GSM1616878_FVEH_6_1 GSM1616882_MVEH_1_1
+## ENSRNOG00000000001           0.2068158           0.2421934
 ## ENSRNOG00000000007          69.4314626          83.3136515
+## ENSRNOG00000000008           0.5595697           0.0000000
+## ENSRNOG00000000009           0.2509657           0.1410698
 ## ENSRNOG00000000010          26.5290822           8.0890022
-## ENSRNOG00000000014           0.3442727           0.4146824
-## ENSRNOG00000000021           7.4405996           7.9819941
-## ENSRNOG00000000024          11.7098678          11.2726827
-## ENSRNOG00000000028           1.8043282           1.4604873
+## ENSRNOG00000000012           0.3943746           0.9606181
 ##                    GSM1616883_MVEH_3_1 GSM1616884_MVEH_6_1 gene.no
-## ENSRNOG00000000007           67.792419           74.789697       2
-## ENSRNOG00000000010           18.300702           14.412526       5
-## ENSRNOG00000000014            1.796318            1.630222       7
-## ENSRNOG00000000021            6.770800            7.861791       9
-## ENSRNOG00000000024           12.037560           12.457588      10
-## ENSRNOG00000000028            1.559198            1.528999      11
-##                      fm.mean    m.mean fold.change new.gene.order
-## ENSRNOG00000000007 72.946089 75.298589   0.9687577              1
-## ENSRNOG00000000010 16.079580 13.600743   1.1822574              2
-## ENSRNOG00000000014  1.158026  1.280408   0.9044199              3
-## ENSRNOG00000000021  7.253832  7.538195   0.9622770              4
-## ENSRNOG00000000024 12.050676 11.922610   1.0107414              5
-## ENSRNOG00000000028  1.609237  1.516228   1.0613422              6
+## ENSRNOG00000000001          0.22098735          0.24217070       1
+## ENSRNOG00000000007         67.79241856         74.78969651       2
+## ENSRNOG00000000008          0.02557915          0.02371864       3
+## ENSRNOG00000000009          0.07801088          0.07233670       4
+## ENSRNOG00000000010         18.30070229         14.41252577       5
+## ENSRNOG00000000012          0.98070826          0.79570374       6
+##                       fm.mean      m.mean fold.change new.gene.order
+## ENSRNOG00000000001  0.2876477  0.23511715   1.2234227              1
+## ENSRNOG00000000007 72.9460891 75.29858885   0.9687577              2
+## ENSRNOG00000000008  0.2094831  0.01643260  12.7480237              3
+## ENSRNOG00000000009  0.1811590  0.09713913   1.8649437              4
+## ENSRNOG00000000010 16.0795801 13.60074341   1.1822574              5
+## ENSRNOG00000000012  0.5396368  0.91234338   0.5914844              6
 ```
 
 ```r
@@ -305,17 +364,17 @@ str(countsfmnz)
 ```
 
 ```
-## 'data.frame':	14046 obs. of  11 variables:
-##  $ GSM1616876_FVEH_3_1: num  76.56 7.32 1.29 8.04 11.18 ...
-##  $ GSM1616877_FVEH_5_1: num  72.85 14.39 1.84 6.28 13.27 ...
-##  $ GSM1616878_FVEH_6_1: num  69.431 26.529 0.344 7.441 11.71 ...
-##  $ GSM1616882_MVEH_1_1: num  83.314 8.089 0.415 7.982 11.273 ...
-##  $ GSM1616883_MVEH_3_1: num  67.79 18.3 1.8 6.77 12.04 ...
-##  $ GSM1616884_MVEH_6_1: num  74.79 14.41 1.63 7.86 12.46 ...
-##  $ gene.no            : int  2 5 7 9 10 11 13 16 19 20 ...
-##  $ fm.mean            : num  72.95 16.08 1.16 7.25 12.05 ...
-##  $ m.mean             : num  75.3 13.6 1.28 7.54 11.92 ...
-##  $ fold.change        : num  0.969 1.182 0.904 0.962 1.011 ...
+## 'data.frame':	20319 obs. of  11 variables:
+##  $ GSM1616876_FVEH_3_1: num  0.3068 76.5609 0.0558 0.2127 7.3181 ...
+##  $ GSM1616877_FVEH_5_1: num  0.3494 72.846 0.0131 0.0798 14.3916 ...
+##  $ GSM1616878_FVEH_6_1: num  0.207 69.431 0.56 0.251 26.529 ...
+##  $ GSM1616882_MVEH_1_1: num  0.242 83.314 0 0.141 8.089 ...
+##  $ GSM1616883_MVEH_3_1: num  0.221 67.7924 0.0256 0.078 18.3007 ...
+##  $ GSM1616884_MVEH_6_1: num  0.2422 74.7897 0.0237 0.0723 14.4125 ...
+##  $ gene.no            : int  1 2 3 4 5 6 7 8 9 10 ...
+##  $ fm.mean            : num  0.288 72.946 0.209 0.181 16.08 ...
+##  $ m.mean             : num  0.2351 75.2986 0.0164 0.0971 13.6007 ...
+##  $ fold.change        : num  1.223 0.969 12.748 1.865 1.182 ...
 ##  $ new.gene.order     : int  1 2 3 4 5 6 7 8 9 10 ...
 ```
 
@@ -355,7 +414,7 @@ dim(dat_diff.fvmv)
 ```
 
 ```
-## [1] 84276     7
+## [1] 121914      7
 ```
 
 
@@ -396,12 +455,12 @@ str(diff.exp.fmraw)
 ```
 
 ```
-## 'data.frame':	251 obs. of  5 variables:
-##  $ gene.no     : int  224 383 388 491 555 557 580 681 784 824 ...
-##  $ fm.mean     : num  13.63 10.55 2.76 17.01 18.99 ...
-##  $ m.mean      : num  11.83 12.29 3.21 17.69 20.07 ...
-##  $ fold.change : num  1.152 0.859 0.859 0.962 0.946 ...
-##  $ resfvmv...3.: num  0.00789 0.04334 0.03036 0.04885 0.01872 ...
+## 'data.frame':	417 obs. of  5 variables:
+##  $ gene.no     : int  6 167 224 281 357 383 388 491 555 557 ...
+##  $ fm.mean     : num  0.5396 0.2265 13.6304 0.1133 0.0389 ...
+##  $ m.mean      : num  0.9123 0.0699 11.8349 0.1994 0.091 ...
+##  $ fold.change : num  0.591 3.238 1.152 0.568 0.428 ...
+##  $ resfvmv...3.: num  0.02787 0.04802 0.00789 0.00548 0.04304 ...
 ```
 
 ```r
@@ -409,13 +468,20 @@ head(diff.exp.fmraw)
 ```
 
 ```
-##                    gene.no   fm.mean    m.mean fold.change resfvmv...3.
-## ENSRNOG00000000466     224 13.630361 11.834890   1.1517101  0.007886797
-## ENSRNOG00000000711     383 10.553780 12.287086   0.8589327  0.043340247
-## ENSRNOG00000000720     388  2.755691  3.208746   0.8588061  0.030361329
-## ENSRNOG00000000894     491 17.013327 17.689166   0.9617936  0.048849376
-## ENSRNOG00000000989     555 18.985484 20.073723   0.9457879  0.018716211
-## ENSRNOG00000000991     557  5.554510  4.285393   1.2961496  0.020799509
+##                    gene.no     fm.mean      m.mean fold.change
+## ENSRNOG00000000012       6  0.53963683  0.91234338   0.5914844
+## ENSRNOG00000000386     167  0.22649791  0.06994415   3.2382682
+## ENSRNOG00000000466     224 13.63036149 11.83488974   1.1517101
+## ENSRNOG00000000542     281  0.11332791  0.19944247   0.5682236
+## ENSRNOG00000000653     357  0.03894405  0.09102526   0.4278379
+## ENSRNOG00000000711     383 10.55377983 12.28708562   0.8589327
+##                    resfvmv...3.
+## ENSRNOG00000000012  0.027873050
+## ENSRNOG00000000386  0.048023209
+## ENSRNOG00000000466  0.007886797
+## ENSRNOG00000000542  0.005476931
+## ENSRNOG00000000653  0.043042904
+## ENSRNOG00000000711  0.043340247
 ```
 
 ```r
@@ -430,16 +496,16 @@ Table: Differentially expressed genes based on raw p-value
 
                       gene.no   fm.mean   m.mean   fold.change   raw.pvalue
 -------------------  --------  --------  -------  ------------  -----------
+ENSRNOG00000000012          6     0.540    0.912         0.591        0.028
+ENSRNOG00000000386        167     0.226    0.070         3.238        0.048
 ENSRNOG00000000466        224    13.630   11.835         1.152        0.008
+ENSRNOG00000000542        281     0.113    0.199         0.568        0.005
+ENSRNOG00000000653        357     0.039    0.091         0.428        0.043
 ENSRNOG00000000711        383    10.554   12.287         0.859        0.043
 ENSRNOG00000000720        388     2.756    3.209         0.859        0.030
 ENSRNOG00000000894        491    17.013   17.689         0.962        0.049
 ENSRNOG00000000989        555    18.985   20.074         0.946        0.019
 ENSRNOG00000000991        557     5.555    4.285         1.296        0.021
-ENSRNOG00000001032        580    26.144   24.545         1.065        0.026
-ENSRNOG00000001172        681    48.957   51.048         0.959        0.013
-ENSRNOG00000001313        784    54.500   57.069         0.955        0.022
-ENSRNOG00000001375        824     2.083    1.765         1.180        0.033
 
 
 ##Adjust p values using `FDR` (or other) for multiple testing and observe the results
@@ -453,12 +519,12 @@ str(diff.exp.fm)
 ```
 
 ```
-## 'data.frame':	14046 obs. of  5 variables:
-##  $ gene.no     : int  2 5 7 9 10 11 13 16 19 20 ...
-##  $ fm.mean     : num  72.95 16.08 1.16 7.25 12.05 ...
-##  $ m.mean      : num  75.3 13.6 1.28 7.54 11.92 ...
-##  $ fold.change : num  0.969 1.182 0.904 0.962 1.011 ...
-##  $ resfvmv...3.: num  0.668 0.722 0.852 0.683 0.869 ...
+## 'data.frame':	20319 obs. of  5 variables:
+##  $ gene.no     : int  1 2 3 4 5 6 7 8 9 10 ...
+##  $ fm.mean     : num  0.288 72.946 0.209 0.181 16.08 ...
+##  $ m.mean      : num  0.2351 75.2986 0.0164 0.0971 13.6007 ...
+##  $ fold.change : num  1.223 0.969 12.748 1.865 1.182 ...
+##  $ resfvmv...3.: num  0.339 0.668 0.386 0.242 0.722 ...
 ```
 
 ```r
@@ -466,13 +532,13 @@ head(diff.exp.fm)
 ```
 
 ```
-##                    gene.no   fm.mean    m.mean fold.change resfvmv...3.
-## ENSRNOG00000000007       2 72.946089 75.298589   0.9687577    0.6683702
-## ENSRNOG00000000010       5 16.079580 13.600743   1.1822574    0.7219895
-## ENSRNOG00000000014       7  1.158026  1.280408   0.9044199    0.8523140
-## ENSRNOG00000000021       9  7.253832  7.538195   0.9622770    0.6830687
-## ENSRNOG00000000024      10 12.050676 11.922610   1.0107414    0.8692072
-## ENSRNOG00000000028      11  1.609237  1.516228   1.0613422    0.5310957
+##                    gene.no    fm.mean      m.mean fold.change resfvmv...3.
+## ENSRNOG00000000001       1  0.2876477  0.23511715   1.2234227   0.33918751
+## ENSRNOG00000000007       2 72.9460891 75.29858885   0.9687577   0.66837019
+## ENSRNOG00000000008       3  0.2094831  0.01643260  12.7480237   0.38598138
+## ENSRNOG00000000009       4  0.1811590  0.09713913   1.8649437   0.24244770
+## ENSRNOG00000000010       5 16.0795801 13.60074341   1.1822574   0.72198950
+## ENSRNOG00000000012       6  0.5396368  0.91234338   0.5914844   0.02787305
 ```
 
 ```r
@@ -486,7 +552,7 @@ diff.exp.fm$pvalue.hb.adj <- round(p.adjust(diff.exp.fm$raw.pvalue, "BY"), 4)
 
 ###checking the genes signifcantly different at 5% level of significance between male anf female
 
-sig.fvmv1 <- diff.exp.fm[diff.exp.fm$pvalue.fdr.adj < 0.05,]
+sig.fvmv1 <- diff.exp.fm[diff.exp.fm$pvalue.fdr.adj < 0.20,]
 dim(sig.fvmv1)
 ```
 
@@ -497,7 +563,7 @@ dim(sig.fvmv1)
 ```r
 #View(sig.fvmv1)
 
-sig.fvmv2 <- diff.exp.fm[diff.exp.fm$pvalue.hb.adj < 0.05,]
+sig.fvmv2 <- diff.exp.fm[diff.exp.fm$pvalue.hb.adj < 0.20,]
 dim(sig.fvmv2)
 ```
 
@@ -510,6 +576,35 @@ dim(sig.fvmv2)
 ```
 
 
+
+```r
+tmp1 <- countsfmnz[rownames(countsfmnz) == "ENSRNOG00000037911",]
+require(tidyr)
+tmp <- countsfmnz %>% select(1:6) %>%
+  add_rownames(var = "gene") %>%
+  gather(key = sample, value = RPKM, -gene) %>%
+  mutate(group = ifelse(grepl("FVEH", sample), "female", "male")) %>%
+  select(-sample)
+
+tmp_test <- tmp %>%
+  group_by(gene) %>%
+  mutate(pvalue = t.test(RPKM[group == "female"], RPKM[group == "male"], var.equal = F)$p.value)
+head(tmp_test)
+```
+
+```
+## Source: local data frame [6 x 4]
+## Groups: gene [6]
+## 
+##                 gene       RPKM  group    pvalue
+##                (chr)      (dbl)  (chr)     (dbl)
+## 1 ENSRNOG00000000001  0.3067553 female 0.9328402
+## 2 ENSRNOG00000000007 76.5608522 female 0.9328402
+## 3 ENSRNOG00000000008  0.0557963 female 0.9328402
+## 4 ENSRNOG00000000009  0.2127083 female 0.9328402
+## 5 ENSRNOG00000000010  7.3180708 female 0.9328402
+## 6 ENSRNOG00000000012  0.5348094 female 0.9328402
+```
 
 #Comments
 

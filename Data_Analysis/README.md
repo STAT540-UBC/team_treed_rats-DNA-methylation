@@ -12,7 +12,7 @@
   * Good that Estradiol and Male samples cluster together
 
 ### Sanity Checking RNAseq Data (Emma and David) 
-
+[1-RNA_Seq_Sanity_Check.md](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/Data_Analysis/1-RNA_Seq_Sanity_Check.md)
 * Motivation 
  * Same as with methylation data, the RNAseq data must be checked for any obvious anomalies or problems.
 * Results 

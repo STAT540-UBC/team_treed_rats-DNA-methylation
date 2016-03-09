@@ -5,40 +5,9 @@ March 8, 2016
 
 ```r
 library(dplyr)
-```
-
-```
-## 
-## Attaching package: 'dplyr'
-```
-
-```
-## The following objects are masked from 'package:stats':
-## 
-##     filter, lag
-```
-
-```
-## The following objects are masked from 'package:base':
-## 
-##     intersect, setdiff, setequal, union
-```
-
-```r
 library(ggplot2)
 require(tidyr)
-```
-
-```
-## Loading required package: tidyr
-```
-
-```r
 require(knitr)
-```
-
-```
-## Loading required package: knitr
 ```
 
 ## Load data
@@ -123,7 +92,7 @@ ggplot(rnaseq_male_female_ttest_corrected) +
 ## Warning: Removed 128 rows containing non-finite values (stat_density).
 ```
 
-![](2-RNAseq_differential_expression_files/figure-html/unnamed-chunk-4-1.png)
+![](2-RNAseq_differential_expression_files/figure-html/unnamed-chunk-3-1.png)
 
 Only 1 genes with fdr < 0.05
 
@@ -151,7 +120,7 @@ ggplot(rnaseq_male_female_ttest_corrected, aes(log2_fold_change)) +
   geom_vline(xintercept = c(sd_fc*2, -sd_fc*2))
 ```
 
-![](2-RNAseq_differential_expression_files/figure-html/unnamed-chunk-5-1.png)
+![](2-RNAseq_differential_expression_files/figure-html/unnamed-chunk-4-1.png)
 
 Choose 2 standard deviations away and have pvalue < 0.01
 

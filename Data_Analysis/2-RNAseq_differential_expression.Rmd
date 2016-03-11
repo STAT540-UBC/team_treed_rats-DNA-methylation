@@ -1,9 +1,14 @@
-# 2-RNAseq_differential_expression
-Tony Hui  
-March 8, 2016  
+---
+title: "2-RNAseq_differential_expression"
+author: "Tony Hui"
+date: "March 8, 2016"
+output: 
+  html_document: 
+    keep_md: yes
+    self_contained: yes
+---
 
-
-```r
+```{r setup, message=FALSE, warning=FALSE}
 library(dplyr)
 library(ggplot2)
 require(tidyr)
@@ -12,22 +17,19 @@ require(limma)
 require(edgeR)
 ```
 
-
-```r
+```{r, eval=FALSE}
 setwd("Data_Analysis/")
 ```
 
 ## Load data
 
-
-```r
+```{r}
 rnaseq <- read.table(file="../RNASeq_data/RNAseq_all_merged.txt", header = TRUE, stringsAsFactors = FALSE) %>% tbl_df()
 ```
 
 ## Plot distribution of RPKMs
 
-
-```r
+```{r}
 rnaseq_male_female <- rnaseq %>%
   select(genes, contains("FVEH"), contains("MVEH")) %>%
   gather(key = sample, value = RPKM, -genes) %>%
@@ -39,20 +41,13 @@ rnaseq_male_female %>%
   scale_x_log10()
 ```
 
-```
-## Warning: Removed 57394 rows containing non-finite values (stat_density).
-```
-
-![](2-RNAseq_differential_expression_files/figure-html/unnamed-chunk-3-1.png)
-
 ## T-test
 
 Since the distribution is not normal, need to log transform first before performing further calculations
 
 Since some values are 0, will do log(x + 1)
 
-
-```r
+```{r t-test, cache=TRUE}
 rnaseq_male_female_cutoff <- rnaseq_male_female %>%
   # mutate(RPKM = ifelse(RPKM < cutoff, cutoff, RPKM)) %>%
   mutate(RPKM = log(RPKM + 0.5, 10)) %>%
@@ -75,18 +70,9 @@ rnaseq_male_female_ttest_corrected <- rnaseq_male_female_ttest %>%
   arrange(fdr)
 ```
 
-
-```r
+```{r}
 rnaseq_male_female_ttest_corrected %>% head(3) %>% kable("markdown")
 ```
-
-
-
-|genes              | log_female_mean| log_male_mean|   pvalue| log2_fold_change|       fdr|
-|:------------------|---------------:|-------------:|--------:|----------------:|---------:|
-|ENSRNOG00000037911 |        1.704870|    -0.1898828| 1.50e-06|        6.2942334| 0.0341895|
-|ENSRNOG00000009325 |        1.337283|     1.2860355| 1.59e-05|        0.1702392| 0.1797370|
-|ENSRNOG00000006587 |        1.365073|     1.3445241| 7.14e-05|        0.0682608| 0.1931957|
 
 Only one significant gene: ENSRNOG00000037911
 
@@ -94,20 +80,16 @@ Only one significant gene: ENSRNOG00000037911
 
 This suggests there's nothing significant
 
-
-```r
+```{r}
 ggplot(rnaseq_male_female_ttest_corrected) +
   geom_histogram(aes(pvalue, fill = "pvalue"), bins = 20) +
   # geom_density(aes(fdr, color = "fdr")) +
   theme_bw()
 ```
 
-![](2-RNAseq_differential_expression_files/figure-html/unnamed-chunk-5-1.png)
-
 ## Try Limma's `voom` function
 
-
-```r
+```{r}
 samples <- colnames(rnaseq)[grepl("FVEH|MVEH", colnames(rnaseq))]
 
 limma_design_matrix <- data.frame(
@@ -120,11 +102,7 @@ rownames(limma_design_matrix) <- samples
 voom_rnaseq <- rnaseq %>%
   select(contains("FVEH"), contains("MVEH")) %>% data.matrix() %>%
   voom(design = limma_design_matrix, plot = T, lib.size = c(rep(1e7, 6)))
-```
 
-![](2-RNAseq_differential_expression_files/figure-html/unnamed-chunk-6-1.png)
-
-```r
 fit <- lmFit(object = voom_rnaseq, design = limma_design_matrix)
 
 cont.matrix <- makeContrasts(FemaleVsMale=Female-Male, levels=limma_design_matrix)
@@ -136,31 +114,15 @@ top_DE_genes <- topTable(fit2, adjust="fdr")
 
 One significant gene...! ENSRNOG00000037911
 
-
-```r
+```{r}
 top_DE_genes %>% head(3) %>% kable("markdown")
-```
 
-
-
-|      |     logFC|    AveExpr|        t| P.Value| adj.P.Val|        B|
-|:-----|---------:|----------:|--------:|-------:|---------:|--------:|
-|23406 | 6.2942334| -0.8055886| 36.01412| 1.3e-06| 0.0394296| 6.502884|
-|5674  | 0.1702392|  1.0353088| 25.38509| 6.2e-06| 0.0607408| 5.074935|
-|21863 | 1.0320431| -3.8059067| 25.72073| 5.8e-06| 0.0607408| 5.073143|
-
-```r
 rnaseq[23406,]$genes
-```
-
-```
-## [1] "ENSRNOG00000037911"
 ```
 
 ### Try edgeR
 
-
-```r
+```{r}
 edgeR_DGElist <- DGEList(
   counts = rnaseq %>%
     select(contains("FVEH"), contains("MVEH")) %>%
@@ -171,19 +133,9 @@ edgeR_DGElist <- DGEList(
 ) %>% 
   # TMM normalization
   calcNormFactors() 
-```
 
-```
-## Removing 6947 rows with all zero counts
-```
-
-```r
 plotMDS.DGEList(edgeR_DGElist)
-```
 
-![](2-RNAseq_differential_expression_files/figure-html/unnamed-chunk-8-1.png)
-
-```r
 edgeR_DGElist <- edgeR_DGElist %>% 
   estimateDisp(design = limma_design_matrix, robust=TRUE)
 
@@ -192,22 +144,10 @@ edgeR_DGElist <- edgeR_DGElist %>%
 fit <- glmQLFit(edgeR_DGElist, limma_design_matrix, robust=TRUE)
 
 plotQLDisp(fit)
-```
 
-![](2-RNAseq_differential_expression_files/figure-html/unnamed-chunk-8-2.png)
-
-```r
 qlf <- glmQLFTest(fit, contrast=cont.matrix)
 topTags(qlf) %>% as.data.frame %>% head(., 3) %>% kable("markdown")
 ```
-
-
-
-|      |     logFC|   logCPM|         F|    PValue|       FDR|
-|:-----|---------:|--------:|---------:|---------:|---------:|
-|23406 | 7.5454868| 1.451248| 520.77912| 0.0000001| 0.0026406|
-|3736  | 0.6795234| 2.407732| 115.62452| 0.0000479| 0.5405731|
-|18766 | 1.8736898| 1.023241|  28.28255| 0.0012255| 0.9999918|
 
 Same result, only ENSRNOG00000037911 is significant at FDR < 0.05
 

@@ -211,3 +211,49 @@ topTags(qlf) %>% as.data.frame %>% head(., 3) %>% kable("markdown")
 
 Same result, only ENSRNOG00000037911 is significant at FDR < 0.05
 
+## Check for cannonical genes that should be differentially expressed
+
+
+```r
+rn6_genes <- read.table("rn6_genes.txt") %>% tbl_df() %>%
+  select(genes = V6,V7) %>% 
+  mutate(genes = gsub("\\..*", "", genes)) %>%
+  unique()
+
+cannonical_genes <- c("Prl", "Xist", "Dby", "Eif2s3y", "Rps4y2", "Smcy", "Uty")
+
+rn6_genes_interest <- rn6_genes %>%
+  filter(V7 %in% cannonical_genes)
+
+rn6_genes_interest
+```
+
+```
+## Source: local data frame [4 x 2]
+## 
+##                genes      V7
+##                (chr)  (fctr)
+## 1 ENSRNOG00000031041  Rps4y2
+## 2 ENSRNOG00000060617     Uty
+## 3 ENSRNOG00000060048 Eif2s3y
+## 4 ENSRNOG00000017374     Prl
+```
+
+Can't find the other genes haha...
+
+
+```r
+right_join(rn6_genes, rnaseq_male_female_ttest_corrected, by = "genes")  %>%
+  filter(genes %in% rn6_genes_interest$genes) %>% kable("markdown")
+```
+
+
+
+|genes              |V7     | log_female_mean| log_male_mean|    pvalue| log2_fold_change|       fdr|
+|:------------------|:------|---------------:|-------------:|---------:|----------------:|---------:|
+|ENSRNOG00000017374 |Prl    |      -0.2900319|    -0.3010300| 0.3739010|        0.0365350| 0.9994924|
+|ENSRNOG00000031041 |Rps4y2 |       0.8469126|     0.8487454| 0.9835238|       -0.0060884| 0.9994924|
+
+What the heck, these guys didn't even look at ENSRNOG00000060617 or ENSRNOG00000060048.
+
+Anyways, seems like these canonical genes aren't differentially expressed in our sample. Man this is the worst RNA-seq ever.

@@ -17,4 +17,4 @@
  * Same as with methylation data, the RNAseq data must be checked for any obvious anomalies or problems.
 * Results 
  * A lot of genes were found to have an RPKM value of 0.
- * Replications in each group were highly correlated with one another.
+ * Replications in each group were highly correlated with one another. There is one particular sample that looks to be less correlated, although when actually looking at the values 0.97 correlation is good. Based on this, the gene was decided to be kept in. 

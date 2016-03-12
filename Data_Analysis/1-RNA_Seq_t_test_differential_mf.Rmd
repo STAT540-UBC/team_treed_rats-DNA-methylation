@@ -1,0 +1,256 @@
+---
+title: "Finding differentially expressed genes for RNAseq `rpkm` read counts data using multiple `t` test and fold change"
+author: "Rashed"
+date: "February 29, 2016"
+output: 
+  html_document: 
+    fig_caption: yes
+    keep_md: yes
+    toc: yes
+---
+
+# Steps to find out differentially expressed genes using multiple `t` test and fold change
+
+The analysis pipeline consists of the following steps.
+
+ 1. Check the distribution of the log rpkm counts of individual samples (replicates) for male and female
+ 2. Compute the mean of rpkm counts over male and female sample and check the distribution of the mean log rpkm counts for male and female
+ 3. Filtering the rpkm counts based on discarding some rpkm counts after checking the distribution above
+ 4. Calculate the fold change and prepare the data for t-test
+ 5. Perform t-test and adjust p values using `FDR` (or other) for multiple testing
+
+# Check the distribution of the log rpkm counts of individual samples (replicates) for male and female
+
+## Reading Data
+```{r ch11}
+#setwd("team_treed_rats-DNA-methylation/RNASeq_data/RNASeq_data")
+#dir()
+library(knitr)
+library(rmarkdown)
+library(xtable)
+datn <- read.table(file="C:/Users/Rashed/Documents/all_github/team_treed_rats-DNA-methylation/RNASeq_data/RNAseq_all_merged.txt", 
+                   header = TRUE)
+rownames(datn) <- datn$genes
+datn <- datn[,c(2:14)]
+head(datn)
+#str(datn)
+
+###comparing male and female vehicle
+
+####data preparation
+
+###count data
+#can input raw or norrmalized count. here we put rpkm values as count
+countsfm <- datn[,c(1:3, 7:9, 13)]
+#head(countsfm)
+#str(countsfm)
+#dim(countsfm)
+```
+
+
+## Check the distribution of individual samples
+
+
+```{r ch12}
+##distribution of all female and male samples
+par(mfrow = c(2,3))
+hist(log(countsfm$GSM1616876_FVEH_3_1), xlab = "log RPKM count", main ="female replicate 1")
+hist(log(countsfm$GSM1616877_FVEH_5_1), xlab = "log RPKM count", main ="female replicate 2")
+hist(log(countsfm$GSM1616878_FVEH_6_1), xlab = "log RPKM count", main ="female replicate 3")
+hist(log(countsfm$GSM1616882_MVEH_1_1), xlab = "log RPKM count", main ="male replicate 1")
+hist(log(countsfm$GSM1616883_MVEH_3_1), xlab = "log RPKM count", main ="male replicate 2")
+hist(log(countsfm$GSM1616884_MVEH_6_1), xlab = "log RPKM count", main ="male replicate 3")
+#dev.off()
+
+###possible decision is to remove rpkm counts less than 1 (seems so from the histograms)
+##revised rpkm counts after revision
+```
+
+```{r tony_histograms}
+require(dplyr)
+require(ggplot2)
+require(tidyr)
+
+expression_mf_long <- countsfm %>% 
+  add_rownames() %>%
+  select(-gene.no) %>%
+  gather(key = sample, value = RPKM, ... = -rowname)
+
+expression_mf_long %>%
+  ggplot(aes(RPKM, color = sample)) +
+  geom_density() +
+  scale_x_continuous(trans = "log10") +
+  geom_vline(xintercept = 0.01)
+```
+
+#Compute the mean of rpkm counts over male and female sample and check the distribution of the mean log rpkm counts for male and female
+
+
+##ompute the mean of rpkm counts over male and female sample
+
+
+```{r ch13}
+countsfm$fm.mean <- (countsfm$GSM1616876_FVEH_3_1 + countsfm$GSM1616877_FVEH_5_1 + countsfm$GSM1616878_FVEH_6_1)/3
+countsfm$m.mean <- (countsfm$GSM1616882_MVEH_1_1 + countsfm$GSM1616883_MVEH_3_1 + countsfm$GSM1616884_MVEH_6_1)/3
+head(countsfm)
+#str(countsfm)
+dim(countsfm)
+```
+
+##check the distribution of the mean log rpkm counts for male and female
+
+```{r ch14}
+####distribution of female and male mean log rpkm counts (raw)
+par(mfrow = c(1,2))
+hist(log(countsfm$fm.mean), xlab = "mean log RPKM count", main ="female sample")
+hist(log(countsfm$m.mean), xlab = "mean log RPKM count", main ="male sample")
+#dev.off()
+```
+
+#Filtering the rpkm counts based on discarding some rpkm counts after checking the distribution above
+
+##Filtering the rpkm counts discarding genes with mean rpkm counts less than 1 
+
+
+```{r ch15}
+countsfmnz <- countsfm[countsfm[,8] >= 0.01 & countsfm[,9] >= 0.01, ]
+head(countsfmnz)
+#str(countsfmnz)
+dim(countsfmnz)
+#reduced to 14046 genes
+```
+
+## Distribution of the revised results 
+
+```{r ch16}
+####distribution of female and male mean log rpkm counts after reduction
+par(mfrow = c(1,2))
+hist(log(countsfmnz$fm.mean), xlab = "mean log RPKM count", main ="female sample")
+hist(log(countsfmnz$m.mean), xlab = "mean log RPKM count", main ="male sample")
+#dev.off()
+```
+
+#Calculate the fold change and prepare the data for t-test
+
+```{r ch17}
+####fold change
+##consider male in the denominator
+countsfmnz$fold.change <- countsfmnz$fm.mean/countsfmnz$m.mean
+#countsfmnz1 <- countsfmnz[(countsfmnz$fold.change >= 2 | countsfmnz$fold.change <= 0.5), ]
+countsfmnz<- countsfmnz[order(countsfmnz$gene.no),]
+countsfmnz$new.gene.order <- seq(1: dim(countsfmnz)[1])
+head(countsfmnz)
+str(countsfmnz)
+
+dat_diffexp <- read.table(file=
+            "C:/Users/Rashed/Documents/all_github/team_treed_rats-DNA-methylation/RNASeq_data/row.merged.txt", header = TRUE)
+head(dat_diffexp)
+
+suppressPackageStartupMessages(library(plyr))
+suppressPackageStartupMessages(library(dplyr))
+suppressPackageStartupMessages(library(magrittr))
+suppressPackageStartupMessages(library(ggplot2))
+
+###work with revised rpkm counts after removing genes below cutoff
+rev_gene <- countsfmnz$gene.no
+dat_diffexpn <- dat_diffexp[dat_diffexp$gene.no %in% rev_gene,]
+dat_diffexpn<- dat_diffexpn[order(dat_diffexpn$gene.no),]
+dat_diffexpn$new.gene.order <- rep(1:length(rev_gene), each = 12)
+
+##Data preparation for t-test
+suppressPackageStartupMessages(library(gdata))
+##data with male and female samples only
+dat_diff.fvmv <- dat_diffexpn[dat_diffexpn$group.fct == "FVEH" | dat_diffexpn$group.fct == "MVEH",]
+dim(dat_diff.fvmv)
+```
+
+
+# Perform t-test and adjust p values using `FDR` (or other) for multiple testing
+
+## Perform t-test and observe the results
+
+```{r ch18}
+###individual genes
+dat_diff.fvmv<- dat_diff.fvmv[order(dat_diff.fvmv$new.gene.order),]
+
+##storing the raw p-values
+resfvmv <- matrix(0, nrow = length(unique(dat_diff.fvmv$gene.no)), ncol = 3)
+resfvmv[,1] <- unique(dat_diff.fvmv$gene.no)
+resfvmv[,2] <- unique(dat_diff.fvmv$new.gene.order)
+
+for (i in 1: dim(resfvmv)[1]) {
+  resfvmv[i,3] <- t.test(dat_diff.fvmv[dat_diff.fvmv$new.gene.order==i,]$rpkm_value ~ dat_diff.fvmv[dat_diff.fvmv$new.gene.order==i,]$group)$p.value
+}
+
+resfvmv <- resfvmv
+resfvmv <- data.frame(resfvmv)
+#resfvmv$genes <- factor(levels(droplevels(dat_fvmv$genes)))
+colnames(resfvmv) <- c("gene.no", "new.gene.order", "fvmv.pval")
+#dim(resfvmv[resfvmv$fvmv.pval < 0.05,])  ###251 de genes
+```
+
+Now we observe the results for raw p values (before adjustment for multiple testing) in the following table. Here we have found 251 differentially expressed genes (seems too low!!!) at 5% level of significance. 
+
+```{r ch19}
+###differentially expression result sheet preparation
+
+diff.exp.fmraw <- data.frame(countsfmnz[,7:10], resfvmv[,3])
+diff.exp.fmraw <- diff.exp.fmraw[diff.exp.fmraw$resfvmv...3. < 0.05, ]
+str(diff.exp.fmraw)
+head(diff.exp.fmraw) 
+colnames(diff.exp.fmraw) <- c("gene.no", "fm.mean", "m.mean", "fold.change", "raw.pvalue") 
+diff.exp.fmraw1 <- diff.exp.fmraw[1:10,] #10 DE genes
+knitr::kable(xtable(diff.exp.fmraw1), digits=3, caption = "Differentially expressed genes based on raw p-value")
+```
+
+
+##Adjust p values using `FDR` (or other) for multiple testing and observe the results
+
+```{r ch20}
+###differentially expression result sheet preparation considering all
+
+diff.exp.fm <- data.frame(countsfmnz[,7:10], resfvmv[,3])
+str(diff.exp.fm)
+head(diff.exp.fm) 
+colnames(diff.exp.fm) <- c("gene.no", "fm.mean", "m.mean", "fold.change", "raw.pvalue") 
+
+####adjustment in p-value for multiple comparison test: three methods
+
+diff.exp.fm$pvalue.fdr.adj <- round(p.adjust(diff.exp.fm$raw.pvalue, "BH"), 4)
+diff.exp.fm$pvalue.hb.adj <- round(p.adjust(diff.exp.fm$raw.pvalue, "BY"), 4)
+#diff.exp.fm$pvalue.bn.adj <- round(p.adjust(diff.exp.fm$raw.pvalue, "bonferroni"), 4)
+
+###checking the genes signifcantly different at 5% level of significance between male anf female
+
+sig.fvmv1 <- diff.exp.fm[diff.exp.fm$pvalue.fdr.adj < 0.20,]
+dim(sig.fvmv1)
+#View(sig.fvmv1)
+
+sig.fvmv2 <- diff.exp.fm[diff.exp.fm$pvalue.hb.adj < 0.20,]
+dim(sig.fvmv2)
+#View(sig.fvmv2)
+
+```
+
+
+```{r tony_ttest_code}
+tmp1 <- countsfmnz[rownames(countsfmnz) == "ENSRNOG00000037911",]
+require(tidyr)
+tmp <- countsfmnz %>% select(1:6) %>%
+  add_rownames(var = "gene") %>%
+  gather(key = sample, value = RPKM, -gene) %>%
+  mutate(group = ifelse(grepl("FVEH", sample), "female", "male")) %>%
+  select(-sample)
+
+tmp_test <- tmp %>%
+  group_by(gene) %>%
+  mutate(pvalue = t.test(RPKM[group == "female"], RPKM[group == "male"], var.equal = F)$p.value)
+head(tmp_test)
+```
+
+#Comments
+
+I am confused at the output found!!! Results after adjusting for multiple comparisons seem horrible for differentially expressed genes. No differentially expressed genes are found!!! 
+
+
+

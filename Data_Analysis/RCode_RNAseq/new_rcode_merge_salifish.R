@@ -1,4 +1,4 @@
-setwd("RNASeq_data")
+setwd("RNASeq_data/new_data_Tony_TPM")
 dir()
 rm(list=ls())
 
@@ -66,28 +66,55 @@ dim(GSM1616887_mz3)
 GSM1616887_mz3 <- GSM1616887_mz3[order(GSM1616887_mz3$Name),]
 head(GSM1616887_mz3)
 
-#data file combination  
-merged <- data.frame(cbind(GSM1616876_fv1, GSM1616877_fv2$TPM, GSM1616878_fv3$TPM, 
+#data file combination for TPM counts
+merged.tpm <- data.frame(GSM1616876_fv1,  
+                           GSM1616877_fv2$TPM, GSM1616878_fv3$TPM, 
                            GSM1616879_fz1$TPM, GSM1616880_fz2$TPM, 
                            GSM1616881_fz3$TPM, GSM1616882_mv1$TPM, 
                            GSM1616883_mv2$TPM, GSM1616884_mv3$TPM, 
                            GSM1616885_mz1$TPM, GSM1616886_mz2$TPM, 
-                           GSM1616887_mz3$TPM))
+                           GSM1616887_mz3$TPM)
 #merged$gene.no <- seq(1:30897)
-colnames(merged) <- c("genes", "GSM1616876", "GSM1616877", 
+merged.tpm <- data.frame(merged.tpm[,c(1:2, 4:14)])
+colnames(merged.tpm) <- c("genes", "GSM1616876", "GSM1616877", 
                       "GSM1616878", "GSM1616879", "GSM1616880", 
                       "GSM1616881", "GSM1616882", "GSM1616883", 
                       "GSM1616884", "GSM1616885", "GSM1616886", 
                       "GSM1616887")
 
-row.names(merged) <- merged$genes
-merged <- data.frame(merged[,c(2:13)])
-names(merged)
-dim(merged)
-head(merged)
+row.names(merged.tpm) <- merged.tpm$genes
+merged.tpm <- data.frame(merged.tpm[,c(2:13)])
+names(merged.tpm)
+dim(merged.tpm)
+head(merged.tpm)
+
+#data file combination for raw read counts
+merged.raw <- data.frame(cbind(GSM1616876_fv1, 
+                               GSM1616877_fv2$NumReads, GSM1616878_fv3$NumReads, 
+                               GSM1616879_fz1$NumReads, GSM1616880_fz2$NumReads, 
+                               GSM1616881_fz3$NumReads, GSM1616882_mv1$NumReads, 
+                               GSM1616883_mv2$NumReads, GSM1616884_mv3$NumReads, 
+                               GSM1616885_mz1$NumReads, GSM1616886_mz2$NumReads, 
+                               GSM1616887_mz3$NumReads))
+#merged$gene.no <- seq(1:30897)
+merged.raw <- data.frame(merged.raw[,c(1,3:14)])
+colnames(merged.raw) <- c("genes", "GSM1616876", "GSM1616877", 
+                          "GSM1616878", "GSM1616879", "GSM1616880", 
+                          "GSM1616881", "GSM1616882", "GSM1616883", 
+                          "GSM1616884", "GSM1616885", "GSM1616886", 
+                          "GSM1616887")
+
+row.names(merged.raw) <- merged.raw$genes
+merged.raw <- data.frame(merged.raw[,c(2:13)])
+names(merged.raw)
+dim(merged.raw)
+head(merged.raw)
+
 
 ####writing into aggregated file
-write.table(merged, "RNAseq_new_merged_TPM.txt", sep="\t") 
+write.table(merged.tpm, "RNAseq_new_merged_TPM.txt", sep="\t") 
+write.table(merged.raw, "RNAseq_new_merged_raw.txt", sep="\t") 
+
 
 ###meta data: design matrix
 
@@ -99,10 +126,11 @@ head(meta_dat)
 
 ###another aggregation
 
-allGene <- row.names(merged)
+#TPM
+allGene.tpm <- row.names(merged.tpm)
 
 prepareData <- function(myGenes) {
-  miniDat <- t(merged[myGenes, ])
+  miniDat <- t(merged.tpm[myGenes, ])
   miniDat <- suppressWarnings(data.frame(gExp = as.vector(miniDat),
                                          gene = rep(colnames(miniDat), each = nrow(miniDat))))
   miniDat <- suppressWarnings(data.frame(meta_dat, miniDat))
@@ -110,10 +138,29 @@ prepareData <- function(myGenes) {
 }
 
 #combine expression data and design
-pDat <- prepareData(allGene)
-head(pDat)
-str(pDat)
-dim(pDat)
+pDat.tpm <- prepareData(allGene.tpm)
+head(pDat.tpm)
+str(pDat.tpm)
+dim(pDat.tpm)
+
+
+#Raw
+allGene.raw <- row.names(merged.raw)
+
+prepareData <- function(myGenes) {
+  miniDat <- t(merged.raw[myGenes, ])
+  miniDat <- suppressWarnings(data.frame(gExp = as.vector(miniDat),
+                                         gene = rep(colnames(miniDat), each = nrow(miniDat))))
+  miniDat <- suppressWarnings(data.frame(meta_dat, miniDat))
+  miniDat
+}
+
+#combine expression data and design
+pDat.raw <- prepareData(allGene.raw)
+head(pDat.raw)
+str(pDat.raw)
+dim(pDat.raw)
 
 ####writing into aggregated file
-write.table(pDat, "row.merged_TPM.txt", sep="\t")
+write.table(pDat.tpm, "row.merged_TPM.txt", sep="\t")
+write.table(pDat.raw, "row.merged_raw.txt", sep="\t")

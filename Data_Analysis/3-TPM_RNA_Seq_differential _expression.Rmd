@@ -274,15 +274,15 @@ in condition 1 with regard to condition 2 (M = “down”):
 ```{r ch20}
 fmnoiseqbio.deg <- degenes(fmnoiseqbio, q = 0.95, M = NULL)
 
-knitr::kable(fmnoiseqbio.deg, digits = 3, type = "markdown") 
+knitr::kable(fmnoiseqbio.deg, digits = 3, format = "markdown") 
 
 fmnoiseqbio.deg1 <- degenes(fmnoiseqbio, q = 0.95, M = "up")
 
-knitr::kable(fmnoiseqbio.deg1, digits = 3, type = "markdown") 
+knitr::kable(fmnoiseqbio.deg1, digits = 3, format = "markdown") 
 
 fmnoiseqbio.deg2 <- degenes(fmnoiseqbio, q = 0.95, M = "down")
 
-knitr::kable(fmnoiseqbio.deg2, digits = 3, type = "markdown") 
+knitr::kable(fmnoiseqbio.deg2, digits = 3, format = "markdown") 
 ```
 
 Please remember that, when using `NOISeq`, the probability of differential expression is not equivalent to 1 − pvalue. We recommend for q to use values around 0.8. However, when using `NOISeqBIO`, the probability of differential expression would be equivalent to 1 − FDR, where FDR can be considered as an adjusted p-value. Hence, in this case, it would be more convenient to use q = 0.95. 

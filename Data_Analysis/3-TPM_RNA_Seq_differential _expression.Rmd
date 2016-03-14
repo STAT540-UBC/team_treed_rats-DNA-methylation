@@ -9,6 +9,10 @@ output:
     toc: yes
 ---
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
 # Steps to find out differentially expressed genes using `NOISeq` package in `R`
 
 The analysis pipeline consists of the following steps.
@@ -26,6 +30,8 @@ The analysis pipeline consists of the following steps.
 The expression data must be provided in a matrix or a `data.frame` `R` object, having as many rows as the number of features to be studied and as many columns as the number of samples in the experiment. The expression data can be both read counts or normalized expression data such as RPKM values, and also any other normalized expression values.
 
 ```{r ch11}
+library(knitr)
+library(rmarkdown)
 ###TPM
 datn <- read.table(file="C:/Users/Rashed/Documents/all_github/team_treed_rats-DNA-methylation/RNASeq_data/new_data_Tony_TPM/RNAseq_new_merged_raw.txt", header = TRUE)
 head(datn)
@@ -252,14 +258,6 @@ However, when using `NOISeq` or `NOISeqBIO` to compute differential expression, 
 
 ```{r ch19}
 ####Differential expression
-
-#NOISeq-real: using available replicates
-fmnoiseq1 <- noiseq(datafm, k = 0.5, norm = "n", factor = "gender", nss = 0, replicates = "technical")
-head(fmnoiseq1@results[[1]])
-
-#fmnoiseq2 <- noiseq(datafm, k = 0.5, norm = "n", factor = "gender", nss = 5, replicates = #"biological")
-#head(fmnoiseq2@results[[1]])
-
 #NOISeqBIO: recommended when we have biological replicates
 fmnoiseqbio <- noiseqbio(datafm, k = 0.5, norm = "n", nclust = 50, factor = "gender", 
                          r = 20, adj = 1.5, plot = TRUE, a0per = 0.9, random.seed = 12345, 
@@ -274,23 +272,17 @@ Once we have obtained the differential expression probability for each one of th
 in condition 1 with regard to condition 2 (M = “down”):
 
 ```{r ch20}
-fmnoiseq1.deg <- degenes(fmnoiseq1, q = 0.8, M = NULL)
-
-fmnoiseq1.deg1 <- degenes(fmnoiseq1, q = 0.8, M = "up")
-
-fmnoiseq1.deg2 <- degenes(fmnoiseq1, q = 0.8, M = "down")
-
-#fmnoiseq2.deg <- degenes(fmnoiseq2, q = 0.8, M = NULL)
-
-#fmnoiseq2.deg1 <- degenes(fmnoiseq2, q = 0.8, M = "up")
-
-#fmnoiseq2.deg2 <- degenes(fmnoiseq2, q = 0.8, M = "down")
-
 fmnoiseqbio.deg <- degenes(fmnoiseqbio, q = 0.95, M = NULL)
+
+knitr::kable(fmnoiseqbio.deg, digits = 3, type = "markdown") 
 
 fmnoiseqbio.deg1 <- degenes(fmnoiseqbio, q = 0.95, M = "up")
 
+knitr::kable(fmnoiseqbio.deg1, digits = 3, type = "markdown") 
+
 fmnoiseqbio.deg2 <- degenes(fmnoiseqbio, q = 0.95, M = "down")
+
+knitr::kable(fmnoiseqbio.deg2, digits = 3, type = "markdown") 
 ```
 
 Please remember that, when using `NOISeq`, the probability of differential expression is not equivalent to 1 − pvalue. We recommend for q to use values around 0.8. However, when using `NOISeqBIO`, the probability of differential expression would be equivalent to 1 − FDR, where FDR can be considered as an adjusted p-value. Hence, in this case, it would be more convenient to use q = 0.95. 

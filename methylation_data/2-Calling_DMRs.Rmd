@@ -14,6 +14,8 @@ require(ggplot2)
 require(dplyr)
 ```
 
+# Merge data
+
 ```{r data_preprocessing, echo=FALSE, eval=FALSE}
 load("../methylation_data/cpg_files_merged.RData")
 
@@ -46,11 +48,11 @@ bssmooth_smooth <- BSmooth(bssmooth_smooth, verbose = TRUE, parallelBy = "chromo
 
 pData(bssmooth_smooth)$col <- c("#7fc97f","#beaed4","#fdc086")
 
-save(... = bssmooth_smooth, file = "../methylation_data/bssmooth_smooth.RData", compress = T)
+# save(... = bssmooth_smooth, file = "../methylation_data/bssmooth_smooth.RData", compress = T)
 ```
 
 ```{r load_data}
-load("/projects/epigenomics/users/thui/stat540/methylation_data/bssmooth_smooth.RData")
+# load("/projects/epigenomics/users/thui/stat540/methylation_data/bssmooth_smooth.RData")
 ```
 
 ```{r samples}
@@ -61,23 +63,30 @@ bssmooth_dt <- cbind(
   getMeth(bssmooth_smooth) %>% as.data.frame() %>% setnames(paste0(samples, "_meth")),
   getCoverage(bssmooth_smooth) %>% as.data.frame() %>% setnames(paste0(samples, "_cov"))
 ) %>% data.table() %>% select(-end, -width, -strand)
+
+save(bssmooth_dt, file = "../methylation_data/bssmooth_smooth.RData", compress = T)
+# load("bssmooth_smooth.RData")
 ```
 
+# Call DMRs
+
 ```{r male_vs_female}
-bssmooth_dt_maleVsFemale <- bssmooth_dt %>% 
-  select(-contains("estradiol")) %>% 
+bssmooth_dt_maleVsFemale <- bssmooth_dt %>%
+  select(-contains("estradiol")) %>%
   filter(female_cov > 0, male_cov > 0) %>%
   mutate(diff = female_meth - male_meth)
 ```
 
 ```{r male_vs_female_plot}
-summary(bssmooth_dt_maleVsFemale$diff)
-diff_quantile <- quantile(x = bssmooth_dt_maleVsFemale$diff, probs = c(0.005, 0.995))
+top_percent <- 1.0
+
+# summary(bssmooth_dt_maleVsFemale$diff)
+diff_quantile <- quantile(x = bssmooth_dt_maleVsFemale$diff, probs = c(top_percent/100/2, 1-(top_percent/100/2)))
 diff_quantile
 
-ggplot(bssmooth_dt_maleVsFemale, aes(diff)) +
-  geom_density() +
-  geom_vline(xintercept = diff_quantile)
+# ggplot(bssmooth_dt_maleVsFemale, aes(diff)) +
+#   geom_density() +
+#   geom_vline(xintercept = diff_quantile)
 ```
 
 ```{r group_CpGs_nearby_and_call_DMR}
@@ -97,13 +106,41 @@ bssmooth_dt_maleVsFemale_DMR <- bssmooth_dt_maleVsFemale_dCPG %>%
   summarise(start = min(start), end = max(start)+2, 
             mean_female = mean(female_meth) %>% round(3), 
             mean_male = mean(male_meth) %>% round(3),
+            female_cov = sum(female_cov),
+            male_cov = sum(male_cov),
             num_cpg = n()
             ) %>%
-  filter(num_cpg > min_cpg)
+  filter(num_cpg >= min_cpg)
 ```
 
+# Annotate DMRs
+
 ```{r save_file}
-save(bssmooth_dt_maleVsFemale_DMR, file = "methylation_data/maleVSfemaleDMRs.RData")
+# save(bssmooth_dt_maleVsFemale_DMR, file = "methylation_data/maleVSfemaleDMRs.RData")
+write.csv(x = bssmooth_dt_maleVsFemale_DMR, file = "maleVSfemaleDMRs.csv", quote = F, row.names = F)
+
+write.table(x = bssmooth_dt_maleVsFemale_DMR %>% select(bin,chr,start,end) %>% mutate(strand = "+"), file = "homer/maleVSfemaleDMRs.bed", quote = F, row.names = F, col.names = F, sep = "\t")
+
+system("cd homer; sh homer_annotate.sh maleVSfemaleDMRs.bed")
+```
+
+```{r}
+bssmooth_dt_maleVsFemale_DMR_annotated <- read.table("homer/maleVSfemaleDMRs.bed.annotated", header = T, sep = "\t")
+
+bssmooth_dt_maleVsFemale_DMR_annotated <- bssmooth_dt_maleVsFemale_DMR_annotated %>%
+  select(1:11) %>%
+  setnames(c("bin", "chr", "start", "end", "strand", "score", "ratio", "annotation", "detailed.annotation", "dist.to.tss", "nearest.promoter")) %>%
+  tbl_df() %>%
+  filter(abs(dist.to.tss) < 200000) %>%
+  left_join(., bssmooth_dt_maleVsFemale_DMR)
+
+rn6_genes <- fread("homer/rn6_tss_raw.gtf", skip = 1) %>%
+  select(nearest.promoter = V1, name = V7) %>% as.data.frame() %>% tbl_df() 
+
+maleVsFemale_DMR_genes <- inner_join(bssmooth_dt_maleVsFemale_DMR_annotated, rn6_genes) %>%
+  select(chr, start, end, mean_female, mean_male, annotation, dist.to.tss, nearest.promoter, name)
+
+write.table(maleVsFemale_DMR_genes, file = "2_genes_DMR_associations.tsv", row.names = F, quote = F)
 ```
 
 ```{r, eval=FALSE}

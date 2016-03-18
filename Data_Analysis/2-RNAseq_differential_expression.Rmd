@@ -15,6 +15,8 @@ require(tidyr)
 require(knitr)
 require(limma)
 require(edgeR)
+require(gplots)
+require(pheatmap)
 ```
 
 ```{r, eval=FALSE}
@@ -24,156 +26,156 @@ setwd("Data_Analysis/")
 ## Load data
 
 ```{r}
-rnaseq <- read.table(file="../RNASeq_data/RNAseq_all_merged.txt", header = TRUE, stringsAsFactors = FALSE) %>% tbl_df()
+rnaseq <- read.table(file="../RNASeq_data/new_data_Tony_TPM/RNAseq_new_merged_raw.txt", header = TRUE, stringsAsFactors = FALSE)
+
+rnaseq_meta <- read.table(file = "../RNASeq_data/new_data_Tony_TPM/sailfish_file_table.txt", stringsAsFactors = FALSE)
+
+colnames(rnaseq) <- with(rnaseq_meta, paste(V3, V4, 1:12, sep = "_"))
+
+rnaseq_meta$samples <- with(rnaseq_meta, paste(V3, V4, 1:12, sep = "_"))
 ```
 
-## Plot distribution of RPKMs
+## Plot distribution of gExps
 
 ```{r}
-rnaseq_male_female <- rnaseq %>%
-  select(genes, contains("FVEH"), contains("MVEH")) %>%
-  gather(key = sample, value = RPKM, -genes) %>%
-  mutate(group = ifelse(grepl("FVEH", sample), "female", "male"))
+rnaseq_male_Female <- rnaseq %>%
+  add_rownames("gene") %>%
+  select(gene, contains("vehicle")) %>%
+  gather(key = sample, value = gExp, -gene) %>%
+  mutate(gender = ifelse(grepl("Female", sample), "Female", "male"))
 
-rnaseq_male_female %>% 
-  ggplot(aes(RPKM, color = sample)) +
+rnaseq_male_Female %>% 
+  ggplot(aes(gExp+0.5, color = gender)) +
   geom_density() +
   scale_x_log10()
-```
-
-## T-test
-
-Since the distribution is not normal, need to log transform first before performing further calculations
-
-Since some values are 0, will do log(x + 1)
-
-```{r t-test, cache=TRUE}
-rnaseq_male_female_cutoff <- rnaseq_male_female %>%
-  # mutate(RPKM = ifelse(RPKM < cutoff, cutoff, RPKM)) %>%
-  mutate(RPKM = log(RPKM + 0.5, 10)) %>%
-  group_by(genes) %>%
-  # remove genes with no variation across samples
-  filter(sd(RPKM) > 0) %>%
-  ungroup()
-
-rnaseq_male_female_ttest <- rnaseq_male_female_cutoff %>%
-  group_by(genes) %>%
-  summarize(
-    log_female_mean = t.test(RPKM[group == "female"], RPKM[group != "female"])$estimate[1],
-    log_male_mean = t.test(RPKM[group == "female"], RPKM[group != "female"])$estimate[2],
-    pvalue = t.test(RPKM[group == "female"], RPKM[group != "female"], var.equal = TRUE)$p.value
-    ) 
-
-rnaseq_male_female_ttest_corrected <- rnaseq_male_female_ttest %>%
-  mutate(log2_fold_change = 10^(log_female_mean - log_male_mean) %>% log(2)) %>%
-  mutate(fdr = p.adjust(pvalue, method = "fdr")) %>%
-  arrange(fdr)
-```
-
-```{r}
-rnaseq_male_female_ttest_corrected %>% head(3) %>% kable("markdown")
-```
-
-Only one significant gene: ENSRNOG00000037911
-
-### Pvalue distribution is "normal"
-
-This suggests there's nothing significant
-
-```{r}
-ggplot(rnaseq_male_female_ttest_corrected) +
-  geom_histogram(aes(pvalue, fill = "pvalue"), bins = 20) +
-  # geom_density(aes(fdr, color = "fdr")) +
-  theme_bw()
 ```
 
 ## Try Limma's `voom` function
 
 ```{r}
-samples <- colnames(rnaseq)[grepl("FVEH|MVEH", colnames(rnaseq))]
+samples <- rnaseq_meta %>% filter(V4 == "vehicle")
 
-limma_design_matrix <- data.frame(
-  Female = c(1,1,1,0,0,0),
-  Male = c(0,0,0,1,1,1)
-)
+limma_design_matrix <- model.matrix(~V3, samples)
 
-rownames(limma_design_matrix) <- samples
+rownames(limma_design_matrix) <- samples$samples
 
 voom_rnaseq <- rnaseq %>%
-  select(contains("FVEH"), contains("MVEH")) %>% data.matrix() %>%
-  voom(design = limma_design_matrix, plot = T, lib.size = c(rep(1e7, 6)))
+  select(contains("vehicle")) %>%
+  voom(design = limma_design_matrix, plot = T)
 
-fit <- lmFit(object = voom_rnaseq, design = limma_design_matrix)
+fit <- lmFit(object = voom_rnaseq, design = limma_design_matrix) %>% eBayes()
 
-cont.matrix <- makeContrasts(FemaleVsMale=Female-Male, levels=limma_design_matrix)
-
-fit2 <- contrasts.fit(fit, cont.matrix) %>% eBayes()
-
-top_DE_genes <- topTable(fit2, adjust="fdr")
+limma_results <- topTable(fit, adjust="fdr", number = Inf)
 ```
 
-One significant gene...! ENSRNOG00000037911
+Pvalues are skewed to the right
 
 ```{r}
-top_DE_genes %>% head(3) %>% kable("markdown")
-
-rnaseq[23406,]$genes
+limma_results %>% 
+  ggplot(aes(P.Value)) +
+  geom_density()
 ```
 
-### Try edgeR
+### Double-check nothing funny is going on
 
 ```{r}
-edgeR_DGElist <- DGEList(
-  counts = rnaseq %>%
-    select(contains("FVEH"), contains("MVEH")) %>%
-    data.matrix(),
-  lib.size = c(rep(1e7, 6)),
-  group=rep(1:2,each=3),
-  remove.zeros = TRUE
-) %>% 
-  # TMM normalization
-  calcNormFactors() 
+correlation <- cor(rnaseq %>% select(contains("vehicle")), method = "spearman")
 
-plotMDS.DGEList(edgeR_DGElist)
+diag(correlation) <- NA
 
-edgeR_DGElist <- edgeR_DGElist %>% 
-  estimateDisp(design = limma_design_matrix, robust=TRUE)
+clustering <- hclust(as.dist(1-correlation), method = "ward.D2")
 
-# plotBCV(edgeR_DGElist)
+require(pheatmap)
+pheatmap(correlation, cluster_rows = clustering, cluster_cols = clustering, display_numbers = T, color = colorRampPalette(c("#ffffb2", "#bd0026"))(9))
 
-fit <- glmQLFit(edgeR_DGElist, limma_design_matrix, robust=TRUE)
-
-plotQLDisp(fit)
-
-qlf <- glmQLFTest(fit, contrast=cont.matrix)
-topTags(qlf) %>% as.data.frame %>% head(., 3) %>% kable("markdown")
+plot(clustering)
 ```
 
-Same result, only ENSRNOG00000037911 is significant at FDR < 0.05
+Seems like everything is normal, although there doesn't seem to be a clear separation between male and female
 
-## Check for cannonical genes that should be differentially expressed
+## Try edgeR
 
 ```{r}
-rn6_genes <- read.table("rn6_genes.txt") %>% tbl_df() %>%
-  select(genes = V6,V7) %>% 
-  mutate(genes = gsub("\\..*", "", genes)) %>%
+edgeR_DGElist <- rnaseq %>%
+  select(contains("vehicle")) %>%
+  DGEList(group = rep(c("f","m"), each = 3)) %>%
+  calcNormFactors(method = "TMM") 
+
+edgeR_DGElist_trends <- edgeR_DGElist %>%
+  estimateGLMCommonDisp(limma_design_matrix, verbose=TRUE) %>%
+  estimateGLMTrendedDisp(limma_design_matrix) %>%
+  estimateGLMTagwiseDisp(limma_design_matrix)
+
+plotBCV(edgeR_DGElist_trends)
+
+plotMDS.DGEList(edgeR_DGElist_trends)
+
+fit <- glmFit(edgeR_DGElist_trends, limma_design_matrix) %>% glmLRT(coef = 2)
+
+edgeR_results <- topTags(fit, n = Inf) %>% as.data.frame()
+
+edgeR_results %>% head() %>% kable("markdown")
+```
+
+Once again, right-skewed Pvalues
+
+```{r}
+qplot(edgeR_results$PValue, geom="density")
+```
+
+## Try edgeR with quasilinear fit
+
+There is `glmFit` and `glmQLFit` - not sure the difference
+
+Reference here: http://www.statsci.org/smyth/pubs/QLedgeRPreprint.pdf
+
+```{r}
+fitQL <- glmQLFit(edgeR_DGElist_trends, limma_design_matrix) %>% glmLRT(coef = 2)
+
+edgeR_QL_results <- topTags(fitQL, n = Inf) %>% as.data.frame()
+
+edgeR_QL_results %>% head() %>% kable("markdown")
+```
+
+Once again, right-skewed Pvalues
+
+```{r}
+qplot(edgeR_QL_results$PValue, geom="density")
+```
+
+## Summary of results
+
+```{r, echo=FALSE}
+paste("there are", nrow(limma_results %>% filter(adj.P.Val<0.05)), "DE genes from limma")
+paste("there are", nrow(edgeR_QL_results %>% filter(FDR<0.05)), "DE genes from edgeR QL")
+paste("there are", nrow(edgeR_results %>% filter(FDR<0.05)), "DE genes from edgeR")
+```
+```{r}
+venn(list(
+  edgeR_QL = edgeR_QL_results %>% filter(FDR<0.05) %>% rownames(.),
+  limma = limma_results %>% filter(adj.P.Val<0.05) %>% rownames(.),
+  edgeR = edgeR_results %>% filter(FDR<0.05) %>% rownames(.)
+))
+```
+
+## Check for cannonical gene that should be differentially expressed
+
+```{r}
+rn6_gene <- read.table("rn6_genes.txt") %>% tbl_df() %>%
+  select(gene = V1, V7) %>% 
   unique()
 
-cannonical_genes <- c("Prl", "Xist", "Dby", "Eif2s3y", "Rps4y2", "Smcy", "Uty")
+cannonical_gene <- c("Prl", "Xist", "Dby", "Eif2s3y", "Rps4y2", "Smcy", "Uty")
 
-rn6_genes_interest <- rn6_genes %>%
-  filter(V7 %in% cannonical_genes)
+rn6_gene_interest <- rn6_gene %>%
+  filter(V7 %in% cannonical_gene)
 
-rn6_genes_interest
+rn6_gene_interest
 ```
-
-Can't find the other genes haha...
 
 ```{r}
-right_join(rn6_genes, rnaseq_male_female_ttest_corrected, by = "genes")  %>%
-  filter(genes %in% rn6_genes_interest$genes) %>% kable("markdown")
+right_join(rn6_gene, edgeR_results %>% add_rownames("gene"), by = "gene")  %>%
+  filter(gene %in% rn6_gene_interest$gene) %>% kable("markdown")
 ```
 
-What the heck, these guys didn't even look at ENSRNOG00000060617 or ENSRNOG00000060048.
-
-Anyways, seems like these canonical genes aren't differentially expressed in our sample. Man this is the worst RNA-seq ever.
+Looks like 2 of our 4 cannonical genes are differentially expressed. Yay!

@@ -51,11 +51,7 @@ pData(bssmooth_smooth)$col <- c("#7fc97f","#beaed4","#fdc086")
 # save(... = bssmooth_smooth, file = "../methylation_data/bssmooth_smooth.RData", compress = T)
 ```
 
-```{r load_data}
-# load("/projects/epigenomics/users/thui/stat540/methylation_data/bssmooth_smooth.RData")
-```
-
-```{r samples}
+```{r samples, eval=FALSE}
 samples <- pData(bssmooth_smooth) %>% rownames
 
 bssmooth_dt <- cbind(
@@ -71,14 +67,22 @@ save(bssmooth_dt, file = "../methylation_data/bssmooth_smooth.RData", compress =
 # Call DMRs
 
 ```{r male_vs_female}
+load("/projects/epigenomics/users/thui/stat540/methylation_data/bssmooth_smooth.RData")
+
+rn6_genes <- fread("homer/rn6_tss_raw.gtf", skip = 1) %>%
+  select(nearest.promoter = V1, name = V7) %>% as.data.frame() %>% tbl_df() 
+```
+
+```{r}
 bssmooth_dt_maleVsFemale <- bssmooth_dt %>%
+  tbl_df() %>%
   select(-contains("estradiol")) %>%
   filter(female_cov > 0, male_cov > 0) %>%
   mutate(diff = female_meth - male_meth)
 ```
 
 ```{r male_vs_female_plot}
-top_percent <- 1.0
+top_percent <- 1
 
 # summary(bssmooth_dt_maleVsFemale$diff)
 diff_quantile <- quantile(x = bssmooth_dt_maleVsFemale$diff, probs = c(top_percent/100/2, 1-(top_percent/100/2)))
@@ -102,12 +106,18 @@ bssmooth_dt_maleVsFemale_dCPG <- bssmooth_dt_maleVsFemale %>%
   mutate(bin = 1+cumsum(dist > binsize))
 
 bssmooth_dt_maleVsFemale_DMR <- bssmooth_dt_maleVsFemale_dCPG %>%
+  # filter(bin == 2) %>%
   group_by(chr, bin) %>%
   summarise(start = min(start), end = max(start)+2, 
             mean_female = mean(female_meth) %>% round(3), 
             mean_male = mean(male_meth) %>% round(3),
             female_cov = sum(female_cov),
             male_cov = sum(male_cov),
+            # remove DMRs within transition zones
+            slope_clusters = min(
+              abs(female_meth[1] - female_meth[n()]),
+              abs(male_meth[1] - male_meth[n()])
+              ),
             num_cpg = n()
             ) %>%
   filter(num_cpg >= min_cpg)
@@ -121,30 +131,62 @@ write.csv(x = bssmooth_dt_maleVsFemale_DMR, file = "maleVSfemaleDMRs.csv", quote
 
 write.table(x = bssmooth_dt_maleVsFemale_DMR %>% select(bin,chr,start,end) %>% mutate(strand = "+"), file = "homer/maleVSfemaleDMRs.bed", quote = F, row.names = F, col.names = F, sep = "\t")
 
+system("cd homer; sh get_DE_tss.sh")
 system("cd homer; sh homer_annotate.sh maleVSfemaleDMRs.bed")
 ```
 
 ```{r}
-bssmooth_dt_maleVsFemale_DMR_annotated <- read.table("homer/maleVSfemaleDMRs.bed.annotated", header = T, sep = "\t")
+bssmooth_dt_maleVsFemale_DMR_annotated <- read.table("homer/maleVSfemaleDMRs.bed.annotated", header = T, sep = "\t", quote="")
 
 bssmooth_dt_maleVsFemale_DMR_annotated <- bssmooth_dt_maleVsFemale_DMR_annotated %>%
   select(1:11) %>%
   setnames(c("bin", "chr", "start", "end", "strand", "score", "ratio", "annotation", "detailed.annotation", "dist.to.tss", "nearest.promoter")) %>%
-  tbl_df() %>%
-  filter(abs(dist.to.tss) < 200000) %>%
-  left_join(., bssmooth_dt_maleVsFemale_DMR)
-
-rn6_genes <- fread("homer/rn6_tss_raw.gtf", skip = 1) %>%
-  select(nearest.promoter = V1, name = V7) %>% as.data.frame() %>% tbl_df() 
+  left_join(., bssmooth_dt_maleVsFemale_DMR) %>%
+  tbl_df()
 
 maleVsFemale_DMR_genes <- inner_join(bssmooth_dt_maleVsFemale_DMR_annotated, rn6_genes) %>%
-  select(chr, start, end, mean_female, mean_male, annotation, dist.to.tss, nearest.promoter, name)
-
-write.table(maleVsFemale_DMR_genes, file = "2_genes_DMR_associations.tsv", row.names = F, quote = F)
+  select(chr, start, end, mean_female, mean_male, annotation, dist.to.tss, nearest.promoter, name, slope_clusters)
 ```
 
-```{r, eval=FALSE}
-	R -e '.libPaths("/home/thui/R/x86_64-redhat-linux-gnu-library/3.1");rmarkdown::render(input = "2-Calling_DMRs.Rmd")'
+### Remove irrelevant DMRs
+
+* Remove DMRs that are promoters of other genes
+
+```{r}
+maleVsFemale_DMR_genes_filtered <- maleVsFemale_DMR_genes %>%
+  mutate(annotation = gsub("\\(.*", "", annotation) %>% gsub(" ", "", .)) %>%
+  filter(abs(dist.to.tss) < 150000) %>%
+  # filter(slope_clusters < 0.1) %>%
+  filter(ifelse(grepl("promoter-TSS", annotation), abs(dist.to.tss) < 3000, TRUE))
+
+ggplot(maleVsFemale_DMR_genes_filtered, aes("DMR location", fill = annotation)) +
+  geom_bar(position = position_fill()) +
+  ylab("Fraction of all DMRs") +
+  xlab("")
+```
+
+## Finalize file
+
+```{r}
+de_genes <- read.table("../Data_Analysis/RNAseq_result/DE_genes/glmQLFit_DE_genes.txt", header = TRUE)
+
+dmr_set <- maleVsFemale_DMR_genes_filtered %>%
+  mutate(hypo_in_female = mean_female < mean_male) %>%
+  select(chr, start, end, annotation, dist.to.tss, gene = nearest.promoter, name, hypo_in_female) %>%
+  left_join(., de_genes) %>%
+  mutate(epi_regulation = hypo_in_female == up_in_female)
+
+dmr_set %>%
+  group_by(annotation, epi_regulation) %>%
+  tally() %>%
+  # ungroup() %>%
+  arrange(desc(n))
+  
+write.table(dmr_set %>% filter(epi_regulation), file = "2_genes_DMR_associations.tsv", row.names = F, quote = F)
+```
+
+```{r, eval=FALSE, include=FALSE}
+R -e '.libPaths("/home/thui/R/x86_64-redhat-linux-gnu-library/3.1");rmarkdown::render(input = "2-Calling_DMRs.Rmd")'
 ```
 
 

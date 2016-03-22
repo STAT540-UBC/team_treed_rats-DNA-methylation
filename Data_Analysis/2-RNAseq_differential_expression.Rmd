@@ -193,7 +193,7 @@ output_results <- rnaseq_male_Female %>%
   summarize(log_mean_exp = mean(gExp) %>% round(digits = 2)) %>%
   spread(key = gender, value = log_mean_exp) %>%
   inner_join(., edge_QL_final) %>%
-  mutate(up_in_female = Female > male) %>%
+  mutate(gExp_up_in_female = Female > male) %>%
   select(-LR, -logCPM, -Female, -male, -PValue) %>%
   inner_join(., rn6_gene)
 

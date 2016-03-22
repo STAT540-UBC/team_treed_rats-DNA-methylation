@@ -183,7 +183,7 @@ epi_genes <- dmr_set %>%
   group_by(gene, epi_regulation) %>%
   tally() %>%
   spread(key = epi_regulation, value = n, fill = 0) %>%
-  setnames(c("gene", "epi_regulated", "non_epi_regulated")) %>%
+  setnames(c("gene", "non_epi_regulated", "epi_regulated")) %>%
   mutate(frac_regulated = epi_regulated/(epi_regulated+non_epi_regulated))
 
 epi_gene_list <- epi_genes %>%
@@ -191,8 +191,12 @@ epi_gene_list <- epi_genes %>%
   .$gene
 
 qplot(epi_genes$frac_regulated)
+
+final_table <- dmr_set %>% 
+  filter(gene %in% epi_gene_list) %>%
+  filter(epi_regulation)
   
-write.table(dmr_set %>% filter(gene %in% epi_gene_list), file = "2_genes_DMR_associations.tsv", row.names = F, quote = F, sep = "\t")
+write.table(final_table, file = "2_genes_DMR_associations.tsv", row.names = F, quote = F, sep = "\t")
 ```
 
 ```{r, eval=FALSE, include=FALSE}

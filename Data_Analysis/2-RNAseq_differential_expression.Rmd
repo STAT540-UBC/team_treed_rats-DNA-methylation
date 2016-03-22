@@ -199,7 +199,7 @@ output_results <- rnaseq_male_Female %>%
   mutate(logFC = round(logFC, 3),
          FDR = round (FDR, 3))
 
-write.table(output_results, file = "../Data_Analysis/RNAseq_result/DE_genes/glmQLFit_DE_genes.txt", row.names = F, col.names = T, quote = F)
+write.table(output_results, file = "../Data_Analysis/RNAseq_result/DE_genes/glmQLFit_DE_genes.tsv", row.names = F, col.names = T, quote = F, sep = "\t")
 ```
 
 ## Compare vs NOIse-seq

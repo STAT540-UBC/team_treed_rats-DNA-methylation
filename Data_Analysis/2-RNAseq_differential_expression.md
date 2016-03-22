@@ -214,18 +214,18 @@ qplot(edgeR_QL_results$PValue, geom="density")
 ```
 
 ```
-## [1] "there are 299 DE genes from edgeR QL"
+## [1] "there are 299 DE genes from edgeR glmQLFit"
 ```
 
 ```
-## [1] "there are 61 DE genes from edgeR"
+## [1] "there are 61 DE genes from edgeR glmFit"
 ```
 
 ```r
 venn(list(
-  edgeR_QL = edgeR_QL_results %>% filter(FDR<0.05) %>% rownames(.),
-  limma = limma_results %>% filter(adj.P.Val<0.05) %>% rownames(.),
-  edgeR = edgeR_results %>% filter(FDR<0.05) %>% rownames(.)
+  edgeR_QL = edgeR_QL_results %>% subset(FDR<0.05) %>% rownames(.),
+  limma = limma_results %>% subset(adj.P.Val<0.05) %>% rownames(.),
+  edgeR = edgeR_results %>% subset(FDR<0.05) %>% rownames(.)
 ))
 ```
 
@@ -279,3 +279,56 @@ right_join(rn6_gene, edgeR_results %>% add_rownames("gene"), by = "gene")  %>%
 |ENSRNOT00000043543.2 |Rps4y2  | -0.0269466|  2.445583|    0.0081392| 0.9281144|   1|
 
 Looks like 2 of our 4 cannonical genes are differentially expressed. Yay!
+
+
+```r
+write.table(edgeR_QL_results %>% subset(FDR<0.05) %>% rownames(.), file = "/projects/epigenomics/users/thui/stat540/methylation_data/homer/de_transcripts.txt", row.names = F, col.names = F, quote = F)
+```
+
+```r
+edge_QL_final <- edgeR_QL_results %>% subset(FDR<0.05) %>% add_rownames("gene")
+
+output_results <- rnaseq_male_Female %>% 
+  filter(gene %in% edge_QL_final$gene) %>%
+  # head(100) %>%
+  group_by(gene, gender) %>%
+  summarize(log_mean_exp = mean(gExp) %>% round(digits = 2)) %>%
+  spread(key = gender, value = log_mean_exp) %>%
+  inner_join(., edge_QL_final) %>%
+  mutate(gExp_up_in_female = Female > male) %>%
+  select(-LR, -logCPM, -Female, -male, -PValue) %>%
+  inner_join(., rn6_gene) %>%
+  mutate(logFC = round(logFC, 3),
+         FDR = round (FDR, 3))
+```
+
+```
+## Joining by: "gene"
+## Joining by: "gene"
+```
+
+```
+## Warning in inner_join_impl(x, y, by$x, by$y): joining character vector and
+## factor, coercing into character vector
+```
+
+```r
+write.table(output_results, file = "../Data_Analysis/RNAseq_result/DE_genes/glmQLFit_DE_genes.tsv", row.names = F, col.names = T, quote = F, sep = "\t")
+```
+
+## Compare vs NOIse-seq
+
+
+```r
+noise_degenes <- read.table("../Data_Analysis/RNAseq_result/DE_genes/noise_seq_DEgenes.txt", header = T)
+```
+
+```r
+venn(list(
+  edgeR_QL = edgeR_QL_results %>% subset(FDR<0.05) %>% rownames(.),
+  noiseSeq = noise_degenes$gene,
+  edgeR = edgeR_results %>% subset(FDR<0.05) %>% rownames(.)
+))
+```
+
+![](2-RNAseq_differential_expression_files/figure-html/unnamed-chunk-18-1.png)

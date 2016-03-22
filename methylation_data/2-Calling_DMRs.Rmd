@@ -174,15 +174,25 @@ dmr_set <- maleVsFemale_DMR_genes_filtered %>%
   mutate(hypo_in_female = mean_female < mean_male) %>%
   select(chr, start, end, annotation, dist.to.tss, gene = nearest.promoter, name, hypo_in_female) %>%
   left_join(., de_genes) %>%
-  mutate(epi_regulation = hypo_in_female == up_in_female)
+  mutate(epi_regulation = hypo_in_female == up_in_female) %>%
+  select(-V7) %>%
+  # filter(!annotation %in% c("exon", "intron", "intergenic")) %>%
+  arrange(name, dist.to.tss)
 
-dmr_set %>%
-  group_by(annotation, epi_regulation) %>%
+epi_genes <- dmr_set %>%
+  group_by(gene, epi_regulation) %>%
   tally() %>%
-  # ungroup() %>%
-  arrange(desc(n))
+  spread(key = epi_regulation, value = n, fill = 0) %>%
+  setnames(c("gene", "epi_regulated", "non_epi_regulated")) %>%
+  mutate(frac_regulated = epi_regulated/(epi_regulated+non_epi_regulated))
+
+epi_gene_list <- epi_genes %>%
+  filter(frac_regulated >= 0.5) %>%
+  .$gene
+
+qplot(epi_genes$frac_regulated)
   
-write.table(dmr_set %>% filter(epi_regulation), file = "2_genes_DMR_associations.tsv", row.names = F, quote = F)
+write.table(dmr_set %>% filter(gene %in% epi_gene_list), file = "2_genes_DMR_associations.tsv", row.names = F, quote = F, sep = "\t")
 ```
 
 ```{r, eval=FALSE, include=FALSE}

@@ -147,14 +147,14 @@ qplot(edgeR_QL_results$PValue, geom="density")
 
 ```{r, echo=FALSE}
 paste("there are", nrow(limma_results %>% filter(adj.P.Val<0.05)), "DE genes from limma")
-paste("there are", nrow(edgeR_QL_results %>% filter(FDR<0.05)), "DE genes from edgeR QL")
-paste("there are", nrow(edgeR_results %>% filter(FDR<0.05)), "DE genes from edgeR")
+paste("there are", nrow(edgeR_QL_results %>% filter(FDR<0.05)), "DE genes from edgeR glmQLFit")
+paste("there are", nrow(edgeR_results %>% filter(FDR<0.05)), "DE genes from edgeR glmFit")
 ```
 ```{r}
 venn(list(
-  edgeR_QL = edgeR_QL_results %>% filter(FDR<0.05) %>% rownames(.),
-  limma = limma_results %>% filter(adj.P.Val<0.05) %>% rownames(.),
-  edgeR = edgeR_results %>% filter(FDR<0.05) %>% rownames(.)
+  edgeR_QL = edgeR_QL_results %>% subset(FDR<0.05) %>% rownames(.),
+  limma = limma_results %>% subset(adj.P.Val<0.05) %>% rownames(.),
+  edgeR = edgeR_results %>% subset(FDR<0.05) %>% rownames(.)
 ))
 ```
 
@@ -179,3 +179,36 @@ right_join(rn6_gene, edgeR_results %>% add_rownames("gene"), by = "gene")  %>%
 ```
 
 Looks like 2 of our 4 cannonical genes are differentially expressed. Yay!
+
+```{r}
+write.table(edgeR_QL_results %>% subset(FDR<0.05) %>% rownames(.), file = "/projects/epigenomics/users/thui/stat540/methylation_data/homer/de_transcripts.txt", row.names = F, col.names = F, quote = F)
+```
+```{r}
+edge_QL_final <- edgeR_QL_results %>% subset(FDR<0.05) %>% add_rownames("gene")
+
+output_results <- rnaseq_male_Female %>% 
+  filter(gene %in% edge_QL_final$gene) %>%
+  # head(100) %>%
+  group_by(gene, gender) %>%
+  summarize(log_mean_exp = mean(gExp) %>% round(digits = 2)) %>%
+  spread(key = gender, value = log_mean_exp) %>%
+  inner_join(., edge_QL_final) %>%
+  mutate(up_in_female = Female > male) %>%
+  select(-LR, -logCPM, -Female, -male, -PValue) %>%
+  inner_join(., rn6_gene)
+
+write.table(output_results, file = "../Data_Analysis/RNAseq_result/DE_genes/glmQLFit_DE_genes.txt", row.names = F, col.names = T, quote = F)
+```
+
+## Compare vs NOIse-seq
+
+```{r}
+noise_degenes <- read.table("../Data_Analysis/RNAseq_result/DE_genes/noise_seq_DEgenes.txt", header = T)
+```
+```{r}
+venn(list(
+  edgeR_QL = edgeR_QL_results %>% subset(FDR<0.05) %>% rownames(.),
+  noiseSeq = noise_degenes$gene,
+  edgeR = edgeR_results %>% subset(FDR<0.05) %>% rownames(.)
+))
+```

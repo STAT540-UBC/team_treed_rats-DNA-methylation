@@ -195,7 +195,9 @@ output_results <- rnaseq_male_Female %>%
   inner_join(., edge_QL_final) %>%
   mutate(gExp_up_in_female = Female > male) %>%
   select(-LR, -logCPM, -Female, -male, -PValue) %>%
-  inner_join(., rn6_gene)
+  inner_join(., rn6_gene) %>%
+  mutate(logFC = round(logFC, 3),
+         FDR = round (FDR, 3))
 
 write.table(output_results, file = "../Data_Analysis/RNAseq_result/DE_genes/glmQLFit_DE_genes.txt", row.names = F, col.names = T, quote = F)
 ```

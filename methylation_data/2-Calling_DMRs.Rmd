@@ -174,7 +174,7 @@ dmr_set <- maleVsFemale_DMR_genes_filtered %>%
   mutate(hypo_in_female = mean_female < mean_male) %>%
   select(chr, start, end, annotation, dist.to.tss, gene = nearest.promoter, name, hypo_in_female) %>%
   left_join(., de_genes) %>%
-  mutate(epi_regulation = hypo_in_female == up_in_female) %>%
+  mutate(epi_regulation = hypo_in_female == gExp_up_in_female) %>%
   select(-V7) %>%
   # filter(!annotation %in% c("exon", "intron", "intergenic")) %>%
   arrange(name, dist.to.tss)

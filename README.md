@@ -60,18 +60,26 @@ The data provided from the [paper](http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi
 
 **Methodology and Division of Labour** 
 ---------------------------------------
-1. Firstly, align WGBS reads and call methylation with bismark (**Tony**)
+
+
+
+1. Firstly, [align WGBS reads and call methylation with bismark](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/issues/1) (**Tony**)
 2. At the same time… 
- + Find differentially methylated regions (DMR) between male vs female, and find nearest gene for each DMR (**Tony, Rashed**)
- + Find differentially expressed genes between male vs female (**Emma T., Emma L. David**)
-3. Generate a list of gene and region pairs by finding overlap between 2a and 2b. This list of gene/region pairs represent epigenetically regulated genes that are important for gender (**Everyone**)
+ + [Find differentially methylated regions (DMR) between male vs female, and find nearest gene for each DMR](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/issues/8) (Tony)
+ + [RNA sanity checks] (https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/Data_Analysis/1-RNA_Seq_Sanity_Check.md) - [issue](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/issues/17) (**Emma T., David**)
+ + [RNA alignment with SAILFISH](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/issues/24) (Tony)
+ + [Find differentially expressed genes between male vs female](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/issues/25) (Tony, Rashed) (https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/issues/24) 
+3. Generate a list of gene and region pairs by finding overlap between 2a and 2b. This list of gene/region pairs represent epigenetically regulated genes that are important for gender (Tony)
 4. At the same time...
- + Find DMRs between female and female + estradiol, and only consider DMRs that overlap or are close to regions in (3).  (**Tony, Rashed**)
+ + Find DMRs between female and female + estradiol, and only consider DMRs that overlap or are close to regions in (3).  (Tony)
  + Find differentially expressed genes between female and female + DNMT inhibitor and only consider genes that overlap with (3). (**Emma T., Emma L. David**)
 5. Select genes that overlap between 4a and 4b to form list of master list of gender genes that can be artificially altered via epigenetic reprogramming (**Everyone**)
 6. To conclude, and properly answer the biological question we will describe cellular pathways in the master list in (5).
- + For known genes, describe gene pathways (maybe using Gene Ontology) (**Tony, Rashed, Emma L**)
- + For unknown genes (rat genomes are not well annotated) we will annotate using BLAST and in silico translation to identify them (**Emma T., Emma L. David**) 
-
-
-
+ + [Background research into rats, gender, epigenetics.](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/issues/16)  (Emma L.)
+ + [For known genes, describe gene pathways](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/issues/19) (maybe using Gene Ontology) (**Emma L**)
+ + For unknown genes (rat genomes are not well annotated) we will annotate using BLAST and in silico translation to identify them (**Emma L.**) 
+7. Administrative tasks and preparation of deliverables
+ + [Project proposal](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/issues/6) - (All)
+ + Repo readme directories (Emma T., Emma L, Tony)
+ + [Progress report](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/issues/20) (Emma T.)
+ + [Poster](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/issues/23) (Emma T., Emma L)

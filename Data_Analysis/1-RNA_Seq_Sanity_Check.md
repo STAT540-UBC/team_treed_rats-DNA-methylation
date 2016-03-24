@@ -13,115 +13,13 @@ Emma
 
 ```r
 require(ggplot2)
-```
-
-```
-## Loading required package: ggplot2
-```
-
-```r
 require(data.table)
-```
-
-```
-## Loading required package: data.table
-```
-
-```r
 require(knitr)
-```
-
-```
-## Loading required package: knitr
-```
-
-```r
 require(dplyr)
-```
-
-```
-## Loading required package: dplyr
-```
-
-```
-## 
-## Attaching package: 'dplyr'
-```
-
-```
-## The following objects are masked from 'package:data.table':
-## 
-##     between, last
-```
-
-```
-## The following objects are masked from 'package:stats':
-## 
-##     filter, lag
-```
-
-```
-## The following objects are masked from 'package:base':
-## 
-##     intersect, setdiff, setequal, union
-```
-
-```r
 require(reshape)
-```
-
-```
-## Loading required package: reshape
-```
-
-```
-## 
-## Attaching package: 'reshape'
-```
-
-```
-## The following object is masked from 'package:dplyr':
-## 
-##     rename
-```
-
-```
-## The following object is masked from 'package:data.table':
-## 
-##     melt
-```
-
-```r
 require(reshape2)
-```
-
-```
-## Loading required package: reshape2
-```
-
-```
-## 
-## Attaching package: 'reshape2'
-```
-
-```
-## The following objects are masked from 'package:reshape':
-## 
-##     colsplit, melt, recast
-```
-
-```
-## The following objects are masked from 'package:data.table':
-## 
-##     dcast, melt
-```
-
-```r
 require(pheatmap)
-```
-
-```
-## Loading required package: pheatmap
+require(RColorBrewer)
 ```
 
 **Import Data**
@@ -427,11 +325,19 @@ Merge it all into a nice table (allmerged):
 
 
 ```r
+mypalette <- colorRampPalette(brewer.pal(1, "Reds"))(50)
+```
+
+```
+## Warning in brewer.pal(1, "Reds"): minimal value for n is 3, returning requested palette with 3 different levels
+```
+
+```r
 matrix <- subset(allmerged, select = 3:14)
 pairwise_cor <- matrix %>%
    cor(use = "pairwise.complete.obs")
 diag(pairwise_cor) <- 1
-pheatmap(pairwise_cor, cluster_rows = F, cluster_cols = F, display_numbers = T)
+pheatmap(pairwise_cor, cluster_rows = F, color = mypalette, cluster_cols = F, display_numbers = T)
 ```
 
 ![](1-RNA_Seq_Sanity_Check_files/figure-html/unnamed-chunk-18-1.png)

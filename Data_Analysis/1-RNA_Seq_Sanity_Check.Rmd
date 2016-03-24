@@ -17,7 +17,7 @@ knitr::opts_chunk$set(echo = TRUE)
 **Load Libraries**
 -------------------
 
-```{r}
+```{r message = FALSE}
 require(ggplot2)
 require(data.table)
 require(knitr)
@@ -25,6 +25,7 @@ require(dplyr)
 require(reshape)
 require(reshape2)
 require(pheatmap)
+require(RColorBrewer)
 ```
 
 **Import Data**
@@ -152,11 +153,12 @@ head(allmerged)
 ```
 
 ```{r}
+mypalette <- colorRampPalette(brewer.pal(1, "Reds"))(50)
 matrix <- subset(allmerged, select = 3:14)
 pairwise_cor <- matrix %>%
    cor(use = "pairwise.complete.obs")
 diag(pairwise_cor) <- 1
-pheatmap(pairwise_cor, cluster_rows = F, cluster_cols = F, display_numbers = T)
+pheatmap(pairwise_cor, cluster_rows = F, color = mypalette, cluster_cols = F, display_numbers = T)
 ```
 
 As the heatmap is comparing the mean of all gene expression for each sample, we would expect the correlation between each to be high. 

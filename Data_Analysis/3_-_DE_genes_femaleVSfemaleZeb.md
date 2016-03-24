@@ -243,22 +243,29 @@ Good, most genes are concordant
 gene_list <- output_results_TF %>% filter(concordant) %>% .$gene
 plot_heatmap <- subset(rnaseq, rownames(rnaseq) %in% gene_list) %>% select(-starts_with("male_zeb"))
 plot_heatmap <- log(plot_heatmap+1, base=10)
+
+labels <- rn6_gene %>%
+  filter(gene %in% gene_list) %>%
+  mutate(name = make.names(V7, unique = T)) %>%
+  arrange(gene)
+
+rownames(plot_heatmap) <- labels$name
 ```
 
 Color scale represents `log10(count+1)`
 
 
 ```r
-pheatmap(plot_heatmap, show_rownames = F, cluster_cols = hclust(as.dist(1-cor(plot_heatmap, method = "spearman")), method = "ward.D2"), clustering_method = "ward.D2")
+pheatmap(plot_heatmap, show_rownames = T, cluster_cols = hclust(as.dist(1-cor(plot_heatmap, method = "spearman")), method = "ward.D2"), clustering_method = "ward.D2")
 ```
 
 ![](3_-_DE_genes_femaleVSfemaleZeb_files/figure-html/unnamed-chunk-14-1.png)
 
-Try z-score normalization within rows
+Try z-score normalization within rows.
 
 
 ```r
-pheatmap(plot_heatmap, show_rownames = F, scale = "row", cluster_cols = hclust(as.dist(1-cor(plot_heatmap, method = "spearman")), method = "ward.D2"), clustering_method = "ward.D2")
+pheatmap(plot_heatmap, show_rownames = T, scale = "row", cluster_cols = hclust(as.dist(1-cor(plot_heatmap, method = "spearman")), method = "ward.D2"), clustering_method = "ward.D2")
 ```
 
 ![](3_-_DE_genes_femaleVSfemaleZeb_files/figure-html/unnamed-chunk-15-1.png)

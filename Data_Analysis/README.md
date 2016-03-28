@@ -11,6 +11,13 @@
   * Noticed that female libraries have less coverage overall, which may influence results
   * Good that Estradiol and Male samples cluster together
 
+  
+### Data File Preparation for RNA-Seq data (Rashed)
+[R codes for preparing files](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/tree/master/Data_Analysis/RCode_RNAseq)
+* Data Merginig
+  * Merge all raw data files obtained after alignment with SAILFISH (done by Tony) in two ways for sanity check and differential expression analysis  
+  * [Find the merged files with raw files](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/tree/master/RNASeq_data/new_data_Tony_TPM)
+
 ### Sanity Checking RNAseq Data (Emma and David) 
 [1-RNA_Seq_Sanity_Check.md](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/Data_Analysis/1-RNA_Seq_Sanity_Check.md)
 * Motivation 
@@ -18,3 +25,22 @@
 * Results 
  * A lot of genes were found to have an RPKM value of 0.
  * Replications in each group were highly correlated with one another. There is one particular sample that looks to be less correlated, although when actually looking at the values 0.97 correlation is good. Based on this, the gene was decided to be kept in. 
+
+
+ 
+### Differential Expression Analysis (Male vs Female) (Tony and Rashed) 
+[2-RNAseq_differential_expression.md](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/Data_Analysis/2-RNAseq_differential_expression.md)
+* Motivation
+  * The RNAseq data (raw counts) is used here for finding differentially expressed (DE) genes among male and female
+* Different methods applied 
+  *`edgeR` (`R` package) with usual negative binomial fitting and quasi-likelihood negative binomial fitting
+  * Nonparametric method `NOISeq` (another `R` package)
+  * Other conventional methods like `R` package `DESeq` and `limma` are also applied
+* Result
+  * We have found 317 DE genes among male vs female using `edgeR` with `glmQLFit`
+  * 109 DE genes using `NOISeq`, 
+  * and 61 DE genes using `edgeR` with `glmFit`
+
+### Differential Expression Analysis (Female vs FemaleZeb) (Tony) 
+[3_-_DE_genes_femaleVSfemaleZeb.md](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/Data_Analysis/3_-_DE_genes_femaleVSfemaleZeb.md)
+

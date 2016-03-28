@@ -66,8 +66,10 @@ The data provided from the [paper](http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi
 1. Firstly, [align WGBS reads and call methylation with bismark](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/issues/1) (**Tony**)
 2. At the same time… 
  + [Find differentially methylated regions (DMR) between male vs female, and find nearest gene for each DMR](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/issues/8) (Tony)
- + [RNA sanity checks] (https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/Data_Analysis/1-RNA_Seq_Sanity_Check.md) - [issue](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/issues/17) (**Emma T., David**)
  + [RNA alignment with SAILFISH](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/issues/24) (**Tony**)
+ + [RNA-seq data file preparation for sanity check and analysis](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/tree/master/RNASeq_data) (**Rashed**)
+ + [RNA sanity checks] (https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/Data_Analysis/1-RNA_Seq_Sanity_Check.md) -[issue](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/issues/17) (**Emma T., David**)
+ + [Background research on differentially expressed genes between male vs female] (https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/issues/3) (**Rashed**)
  + [Find differentially expressed genes between male vs female](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/issues/25) (**Tony, Rashed**) 
 3. Generate a list of gene and region pairs by finding overlap between 2a and 2b. This list of gene/region pairs represent epigenetically regulated genes that are important for gender (**Tony**)
 4. At the same time...
@@ -80,6 +82,7 @@ The data provided from the [paper](http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi
  + For unknown genes (rat genomes are not well annotated) we will annotate using BLAST and in silico translation to identify them (**Emma L.**) 
 7. Administrative tasks and preparation of deliverables:
  + [Project proposal](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/issues/6) - (**Everyone**)
- + Repo readme directories (**Emma T., Emma L, Tony**)
+ + Repo readme directories with arrangement (**Emma T., Emma L, Tony, Rashed**)
  + [Progress report](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/issues/20) (**Emma T.**)
  + [Poster](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/issues/23) (**Emma T., Emma L**)
+8. Methodological research for explanation of the various statistical tools and methods used in the project (**Rashed**)

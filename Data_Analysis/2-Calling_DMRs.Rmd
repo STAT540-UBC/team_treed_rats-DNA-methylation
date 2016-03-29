@@ -22,7 +22,7 @@ require(pheatmap)
 
 # Merge data
 
-```{r data_preprocessing, echo=TRUE, eval=FALSE}
+```{r, echo=TRUE, eval=FALSE}
 load("../methylation_data/cpg_files_merged.RData")
 
 bssmooth_cpgs <- lapply(cpg_files_merged, function(x) {
@@ -57,7 +57,7 @@ pData(bssmooth_smooth)$col <- c("#7fc97f","#beaed4","#fdc086")
 # save(... = bssmooth_smooth, file = "../methylation_data/bssmooth_smooth.RData", compress = T)
 ```
 
-```{r samples, eval=FALSE}
+```{r, eval=FALSE}
 samples <- pData(bssmooth_smooth) %>% rownames %>% gsub("_meth_cov", "", x = .)
 
 bssmooth_dt <- cbind(
@@ -72,7 +72,7 @@ save(bssmooth_smooth, bssmooth_dt, file = "../methylation_data/bssmooth_smooth.R
 
 # Call DMRs for female vs male
 
-```{r male_vs_female}
+```{r}
 load("/projects/epigenomics/users/thui/stat540/methylation_data/bssmooth_smooth.RData")
 
 rn6_genes <- fread("../methylation_data/homer/rn6_tss_raw.gtf", skip = 1) %>%
@@ -87,7 +87,7 @@ bssmooth_dt_maleVsFemale <- bssmooth_dt %>%
   mutate(diff = female_meth - male_meth)
 ```
 
-```{r male_vs_female_plot}
+```{r}
 top_percent <- 1
 
 # summary(bssmooth_dt_maleVsFemale$diff)
@@ -134,9 +134,11 @@ bssmooth_dt_maleVsFemale_DMR <- bssmooth_dt_maleVsFemale_dCPG %>%
   select(-slope_clusters, -num_cpg)
 ```
 
+There are `r nrow(bssmooth_dt_maleVsFemale_DMR)` DMRs
+
 ## Annotate DMRs
 
-```{r save_file, cache=TRUE}
+```{r, cache=TRUE}
 # save(bssmooth_dt_maleVsFemale_DMR, file = "methylation_data/maleVSfemaleDMRs.RData")
 write.csv(x = bssmooth_dt_maleVsFemale_DMR, file = "../methylation_data/maleVSfemaleDMRs.csv", quote = F, row.names = F)
 
@@ -162,23 +164,25 @@ maleVsFemale_DMR_genes <- inner_join(bssmooth_dt_maleVsFemale_DMR_annotated, rn6
 ### Remove irrelevant DMRs
 
 * Remove DMRs that are promoters of other genes
-* Remove DMRs that are > 20000 bp away from nearest promoter
+* Remove DMRs that are > 50000 bp away from nearest promoter
 
 ```{r}
 maleVsFemale_DMR_genes_filtered <- maleVsFemale_DMR_genes %>%
   filter(chr != "chrY") %>%
   arrange(chr, start) %>%
   mutate(annotation = gsub("\\(.*", "", annotation) %>% gsub(" ", "", .)) %>%
-  filter(abs(dist.to.tss) < 20000) %>%
+  filter(abs(dist.to.tss) < 50000) %>%
   filter(ifelse(grepl("promoter-TSS", annotation), abs(dist.to.tss) < 3000, TRUE))
 
 ggplot(maleVsFemale_DMR_genes_filtered, aes("DMR location", fill = annotation)) +
   geom_bar(position = position_fill()) +
   ylab("Fraction of all DMRs") +
   xlab("")
+
+head(maleVsFemale_DMR_genes_filtered) %>% kable("markdown")
 ```
 
-## Finalize file
+## Grab DMRs that are likely to ge epigenetically regulating
 
 ```{r}
 de_genes <- read.table("../Data_Analysis/RNAseq_result/DE_genes/glmQLFit_DE_genes.tsv", header = TRUE)
@@ -208,6 +212,8 @@ qplot(epi_genes$frac_regulated)
 final_table <- dmr_set %>% 
   filter(gene %in% epi_gene_list) %>%
   filter(epi_regulation)
+
+head(final_table) %>% kable("markdown")
   
 write.table(final_table, file = "2_genes_DMR_associations.tsv", row.names = F, quote = F, sep = "\t")
 ```
@@ -233,7 +239,7 @@ diff_quantile
 #   geom_vline(xintercept = diff_quantile)
 ```
 
-```{r group_CpGs_nearby_and_call_DMR}
+```{r}
 bssmooth_dt_FemaleVsEstradiol_dCPG <- bssmooth_dt_FemaleVsEstradiol %>%
   filter(diff < diff_quantile[1] | diff > diff_quantile[2]) %>%
   group_by(chr) %>%
@@ -263,6 +269,8 @@ bssmooth_dt_FemaleVsEstradiol_DMR <- bssmooth_dt_FemaleVsEstradiol_dCPG %>%
   select(-slope_clusters, -num_cpg)
 ```
 
+There are `r nrow(bssmooth_dt_FemaleVsEstradiol_DMR)` DMRs between female and estradiol
+
 ## Subset DMRs that are overlapping DMRs between male and female
 
 * also with 20kb of nearest DE gene
@@ -288,7 +296,11 @@ bsmooth_dt_all_DMR_overlap <- (maleVsFemale_DMR_genes_filtered %>% arrange(chr, 
 bsmooth_dt_all_DMR_overlap$mean_estradiol <- bssmooth_dt_FemaleVsEstradiol_DMR_overlap$mean_estradiol
 ```
 
+There are `r nrow(bsmooth_dt_all_DMR_overlap)` DMRs between femaleVSfemale+zeb that overlap with the `r nrow(maleVsFemale_DMR_genes_filtered)` femaleVSmale DMRs close to DE genes.
+
 ### Heatmap of these DMRs
+
+*color represents fractional methylation of these regions*
 
 ```{r}
 heatmap <- bsmooth_dt_all_DMR_overlap %>%
@@ -313,42 +325,44 @@ table(tabulate$hypo_in_femaleVSmale == tabulate$hypo_in_femaleVSestradiol)
 head(tabulate) %>% kable("markdown")
 ```
 
-Within all `r nrow(tabulate)` regions, the methylation of male and female+zeb are the same, and are different compared to female. This is good, because there isn't any filtering - they just happened to end up this way.
+Within **all** the `r nrow(tabulate)` regions, the methylation of male and estradiol are the same, and are different compared to female. This is good, because there isn't any filtering - they just happened to end up this way.
 
-## Subset regions that are epigenetically regulatory
+## Look at DMRs that are potentially epigenetically regulating
 
 ```{r}
-bsmooth_dt_all_DMR_overlap_final <- bsmooth_dt_all_DMR_overlap %>%
-  inner_join(., final_table) %>%
-  select(chr, start, end, annotation, dist.to.tss, gene, name, hypo_in_femaleVSall = hypo_in_female, gExp_up_in_femaleVSmale = gExp_up_in_female) %>%
-  unique()
-
 # bsmooth_dt_all_DMR_overlap_final %>% head %>% kable("markdown")
 
 final_DE_genes <- read.table(file = "../Data_Analysis/RNAseq_result/DE_genes/femVSfemZeb_glmQLFit_DE_genes.tsv", header=TRUE) %>%
   select(gene, name = V7)
 
+bsmooth_dt_all_DMR_overlap_final <- bsmooth_dt_all_DMR_overlap %>%
+  inner_join(., final_table) %>%
+  select(chr, start, end, annotation, dist.to.tss, gene = nearest.promoter, name, hypo_in_femaleVSall = hypo_in_female, gExp_up_in_femaleVSmale = gExp_up_in_female) %>%
+  left_join(., final_DE_genes %>% mutate(deVSall = TRUE)) %>%
+  filter(hypo_in_femaleVSall == gExp_up_in_femaleVSmale) %>%
+  mutate(deVSall = !(is.na(deVSall)))
+
 rn6_de_genes_track <- fread("../methylation_data/homer/rn6_tss_raw.gtf", skip = 1) %>%
   # filter(V1 %in% final_DE_genes$gene) %>%
-  filter(V1 %in%  bsmooth_dt_all_DMR_overlap_final$gene) %>%
+  # filter(V1 %in% bsmooth_dt_all_DMR_overlap_final$gene) %>%
   select(chr = V2, start = V4, end = V5, gene = V1)
 
 rn6_genes_track <- fread("../methylation_data/homer/rn6_tss_raw.gtf", skip = 1) %>%
   select(chr = V2, start = V4, end = V5, gene = V1)
+
+x <- table(bsmooth_dt_all_DMR_overlap_final$deVSall)
+
+bsmooth_dt_all_DMR_overlap_final %>% kable("markdown")
 ```
 
-`r nrow(bsmooth_dt_all_DMR_overlap_final)` of the 34 regions are associated with DE genes
-
-## Filter for DMR-associated genes that are also DE between both conditions
+There are `r x[2]` regions that associated with genes that are DE in all conditions, and `r x[1]` regions that only associated with genes that are DE between male and female (`deVSall` column)
 
 ```{r}
 final_DMR_set <- bsmooth_dt_all_DMR_overlap_final %>%
-  # inner_join(., final_DE_genes) %>%
-  filter(abs(dist.to.tss) < 20000)
-
-final_DMR_set %>% kable("markdown")
+  filter(abs(dist.to.tss) < 50000)
 
 final_DMR_set_visualize <- final_DMR_set %>%
+  filter(!deVSall) %>%
   left_join(., rn6_genes_track, by = "gene") %>%
   mutate(start = pmin(start.x, start.y),
          end = pmax(end.x, end.y))
@@ -356,7 +370,7 @@ final_DMR_set_visualize <- final_DMR_set %>%
 regions_final_DMR_set <- makeGRangesFromDataFrame(final_DMR_set_visualize, seqnames.field = "chr.x", keep.extra.columns = T)
 ```
 
-```{r}
+```{r, cache=TRUE}
 pdf("../methylation_data/final_DMR_plots.pdf")
 for (i in seq_along(regions_final_DMR_set)) {
   title <- paste("Transcript", regions_final_DMR_set$gene[i], "for gene", regions_final_DMR_set$name[i])
@@ -367,14 +381,14 @@ for (i in seq_along(regions_final_DMR_set)) {
              ))
 }
 dev.off()
+```
 
+```{r}
 final_DMR_set_visualize <- final_DMR_set %>%
-  filter(gene %in% final_DE_genes$gene) %>%
+  filter(deVSall) %>%
   left_join(., rn6_genes_track, by = "gene") %>%
   mutate(start = pmin(start.x, start.y),
          end = pmax(end.x, end.y))
-
-final_DMR_set_visualize %>% kable("markdown")
 
 regions_final_DMR_set <- makeGRangesFromDataFrame(final_DMR_set_visualize, seqnames.field = "chr.x", keep.extra.columns = T)
 
@@ -388,6 +402,10 @@ for (i in seq_along(regions_final_DMR_set)) {
              ))
 }
 dev.off()
+```
+
+```{r}
+save.image("../Data_Analysis/2-DMRs.RData", compress = F)
 ```
 
 ```{r, eval=FALSE, include=FALSE}

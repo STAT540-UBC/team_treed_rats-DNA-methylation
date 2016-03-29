@@ -344,7 +344,7 @@ bsmooth_dt_all_DMR_overlap_final <- bsmooth_dt_all_DMR_overlap %>%
 
 rn6_de_genes_track <- fread("../methylation_data/homer/rn6_tss_raw.gtf", skip = 1) %>%
   # filter(V1 %in% final_DE_genes$gene) %>%
-  filter(V1 %in% bssmooth_dt_maleVsFemale_DMR_annotated$nearest.promoter %>% unique) %>%
+  filter(V1 %in% (bssmooth_dt_maleVsFemale_DMR_annotated$nearest.promoter %>% as.character %>% unique)) %>%
   select(chr = V2, start = V4, end = V5, gene = V1)
 
 rn6_genes_track <- fread("../methylation_data/homer/rn6_tss_raw.gtf", skip = 1) %>%

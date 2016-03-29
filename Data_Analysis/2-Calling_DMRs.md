@@ -138,12 +138,12 @@ bssmooth_dt_maleVsFemale_DMR <- bssmooth_dt_maleVsFemale_dCPG %>%
             num_cpg = n()
             ) %>%
   filter(num_cpg >= min_cpg) %>%
-  filter(slope_clusters < 0.2) %>%
+  filter(slope_clusters < 0.1) %>%
   # filter(female_cov >= 3) %>%
   select(-slope_clusters, -num_cpg)
 ```
 
-There are 18361 DMRs
+There are 16308 DMRs
 
 ## Annotate DMRs
 
@@ -195,7 +195,7 @@ maleVsFemale_DMR_genes <- inner_join(bssmooth_dt_maleVsFemale_DMR_annotated, rn6
 ### Remove irrelevant DMRs
 
 * Remove DMRs that are promoters of other genes
-* Remove DMRs that are > 50000 bp away from nearest promoter
+* Remove DMRs that are > 150000 bp away from nearest promoter
 
 
 ```r
@@ -203,7 +203,7 @@ maleVsFemale_DMR_genes_filtered <- maleVsFemale_DMR_genes %>%
   filter(chr != "chrY") %>%
   arrange(chr, start) %>%
   mutate(annotation = gsub("\\(.*", "", annotation) %>% gsub(" ", "", .)) %>%
-  filter(abs(dist.to.tss) < 50000) %>%
+  filter(abs(dist.to.tss) < 150000) %>%
   filter(ifelse(grepl("promoter-TSS", annotation), abs(dist.to.tss) < 3000, TRUE))
 
 ggplot(maleVsFemale_DMR_genes_filtered, aes("DMR location", fill = annotation)) +
@@ -220,14 +220,14 @@ head(maleVsFemale_DMR_genes_filtered) %>% kable("markdown")
 
 
 
-|chr  |    start|      end| mean_female| mean_male|annotation   | dist.to.tss|nearest.promoter     |name    | bin|
-|:----|--------:|--------:|-----------:|---------:|:------------|-----------:|:--------------------|:-------|---:|
-|chr1 | 15779390| 15779992|       0.453|     0.735|Intergenic   |       -2784|ENSRNOT00000088025.1 |Bclaf1  | 212|
-|chr1 | 15795321| 15795567|       0.735|     0.530|intron       |       12969|ENSRNOT00000088025.1 |Bclaf1  | 214|
-|chr1 | 71198288| 71198559|       0.409|     0.615|Intergenic   |       -8000|ENSRNOT00000035217.4 |Zfp78   | 809|
-|chr1 | 80068877| 80069226|       0.924|     0.696|intron       |        4172|ENSRNOT00000021456.2 |Gipr    | 946|
-|chr1 | 80072086| 80073449|       0.598|     0.873|promoter-TSS |         456|ENSRNOT00000021456.2 |Gipr    | 947|
-|chr1 | 81805592| 81805961|       0.617|     0.925|Intergenic   |       26296|ENSRNOT00000080840.1 |Arhgef1 | 984|
+|chr  |    start|      end| mean_female| mean_male|annotation | dist.to.tss|nearest.promoter     |name         | bin|
+|:----|--------:|--------:|-----------:|---------:|:----------|-----------:|:--------------------|:------------|---:|
+|chr1 | 11898931| 11900042|       0.952|     0.732|Intergenic |      -64348|ENSRNOT00000074325.1 |LOC100909555 | 154|
+|chr1 | 11909558| 11909590|       0.818|     0.615|Intergenic |      -54260|ENSRNOT00000074325.1 |LOC100909555 | 155|
+|chr1 | 15705042| 15705893|       0.895|     0.672|intron     |      -77008|ENSRNOT00000088025.1 |Bclaf1       | 211|
+|chr1 | 15779390| 15779992|       0.453|     0.735|Intergenic |       -2784|ENSRNOT00000088025.1 |Bclaf1       | 212|
+|chr1 | 20819921| 20821370|       0.853|     0.639|Intergenic |      141881|ENSRNOT00000079688.1 |Epb41l2      | 276|
+|chr1 | 20823100| 20823805|       0.675|     0.480|Intergenic |      139074|ENSRNOT00000079688.1 |Epb41l2      | 277|
 
 ## Grab DMRs that are likely to ge epigenetically regulating
 
@@ -238,13 +238,9 @@ de_genes <- read.table("../Data_Analysis/RNAseq_result/DE_genes/glmQLFit_DE_gene
 dmr_set <- maleVsFemale_DMR_genes_filtered %>%
   mutate(hypo_in_female = mean_female < mean_male) %>%
   select(chr, start, end, annotation, dist.to.tss, gene = nearest.promoter, name, hypo_in_female) %>%
-  left_join(., de_genes) %>%
+  left_join(., de_genes, by = "gene") %>%
   mutate(epi_regulation = hypo_in_female == gExp_up_in_female) %>%
   select(-V7)
-```
-
-```
-## Joining by: "gene"
 ```
 
 ```
@@ -259,7 +255,7 @@ table(dmr_set$epi_regulation)
 ```
 ## 
 ## FALSE  TRUE 
-##    99    79
+##   249   241
 ```
 
 ```r
@@ -285,7 +281,7 @@ qplot(epi_genes$frac_regulated)
 
 ```r
 final_table <- dmr_set %>% 
-  filter(gene %in% epi_gene_list) %>%
+  # filter(gene %in% epi_gene_list) %>%
   filter(epi_regulation)
 
 head(final_table) %>% kable("markdown")
@@ -293,14 +289,14 @@ head(final_table) %>% kable("markdown")
 
 
 
-|chr  |     start|       end|annotation   | dist.to.tss|gene                 |name   |hypo_in_female |  logFC|   FDR|gExp_up_in_female |epi_regulation |
-|:----|---------:|---------:|:------------|-----------:|:--------------------|:------|:--------------|------:|-----:|:-----------------|:--------------|
-|chr1 |  15779390|  15779992|Intergenic   |       -2784|ENSRNOT00000088025.1 |Bclaf1 |TRUE           | -6.028| 0.014|TRUE              |TRUE           |
-|chr1 |  80072086|  80073449|promoter-TSS |         456|ENSRNOT00000021456.2 |Gipr   |TRUE           | -0.740| 0.008|TRUE              |TRUE           |
-|chr1 | 100512358| 100512582|intron       |       41406|ENSRNOT00000067562.2 |Aspdh  |TRUE           | -6.118| 0.011|TRUE              |TRUE           |
-|chr1 | 174366200| 174366551|intron       |       44766|ENSRNOT00000065288.1 |Nrip3  |TRUE           | -0.445| 0.012|TRUE              |TRUE           |
-|chr1 | 198229110| 198230411|exon         |        3455|ENSRNOT00000087928.1 |Aldoa  |TRUE           | -0.652| 0.000|TRUE              |TRUE           |
-|chr1 | 214192929| 214193004|intron       |      -23079|ENSRNOT00000023376.4 |Phrf1  |TRUE           | -2.657| 0.000|TRUE              |TRUE           |
+|chr  |    start|      end|annotation   | dist.to.tss|gene                 |name         |hypo_in_female |  logFC|   FDR|gExp_up_in_female |epi_regulation |
+|:----|--------:|--------:|:------------|-----------:|:--------------------|:------------|:--------------|------:|-----:|:-----------------|:--------------|
+|chr1 | 11898931| 11900042|Intergenic   |      -64348|ENSRNOT00000074325.1 |LOC100909555 |FALSE          |  1.138| 0.000|FALSE             |TRUE           |
+|chr1 | 11909558| 11909590|Intergenic   |      -54260|ENSRNOT00000074325.1 |LOC100909555 |FALSE          |  1.138| 0.000|FALSE             |TRUE           |
+|chr1 | 15779390| 15779992|Intergenic   |       -2784|ENSRNOT00000088025.1 |Bclaf1       |TRUE           | -6.028| 0.014|TRUE              |TRUE           |
+|chr1 | 21041530| 21041976|Intergenic   |      -79227|ENSRNOT00000079688.1 |Epb41l2      |TRUE           | -5.790| 0.024|TRUE              |TRUE           |
+|chr1 | 78449242| 78449805|Intergenic   |       72476|ENSRNOT00000021223.4 |Arhgap35     |FALSE          |  2.156| 0.000|FALSE             |TRUE           |
+|chr1 | 80072086| 80073449|promoter-TSS |         456|ENSRNOT00000021456.2 |Gipr         |TRUE           | -0.740| 0.008|TRUE              |TRUE           |
 
 ```r
 write.table(final_table, file = "2_genes_DMR_associations.tsv", row.names = F, quote = F, sep = "\t")
@@ -371,7 +367,7 @@ There are 21465 DMRs between female and estradiol
 
 ## Subset DMRs that are overlapping DMRs between male and female
 
-* also with 20kb of nearest DE gene
+* also within 150000 of nearest DE gene
 
 
 ```r
@@ -395,7 +391,7 @@ bsmooth_dt_all_DMR_overlap <- (maleVsFemale_DMR_genes_filtered %>% arrange(chr, 
 bsmooth_dt_all_DMR_overlap$mean_estradiol <- bssmooth_dt_FemaleVsEstradiol_DMR_overlap$mean_estradiol
 ```
 
-There are 75 DMRs between femaleVSfemale+zeb that overlap with the 178 femaleVSmale DMRs close to DE genes.
+There are 186 DMRs between femaleVSfemale+zeb that overlap with the 490 femaleVSmale DMRs close to DE genes.
 
 ### Heatmap of these DMRs
 
@@ -432,8 +428,8 @@ table(tabulate$hypo_in_femaleVSmale == tabulate$hypo_in_femaleVSestradiol)
 
 ```
 ## 
-## TRUE 
-##   75
+## FALSE  TRUE 
+##     1   185
 ```
 
 ```r
@@ -442,16 +438,16 @@ head(tabulate) %>% kable("markdown")
 
 
 
-|chr  |     start|       end| mean_female| mean_male|annotation   | dist.to.tss|nearest.promoter     |name    |  bin| mean_estradiol|hypo_in_femaleVSmale |hypo_in_femaleVSestradiol |
-|:----|---------:|---------:|-----------:|---------:|:------------|-----------:|:--------------------|:-------|----:|--------------:|:--------------------|:-------------------------|
-|chr1 |  15779390|  15779992|       0.453|     0.735|Intergenic   |       -2784|ENSRNOT00000088025.1 |Bclaf1  |  212|          0.693|TRUE                 |TRUE                      |
-|chr1 |  71198288|  71198559|       0.409|     0.615|Intergenic   |       -8000|ENSRNOT00000035217.4 |Zfp78   |  809|          0.676|TRUE                 |TRUE                      |
-|chr1 |  80072086|  80073449|       0.598|     0.873|promoter-TSS |         456|ENSRNOT00000021456.2 |Gipr    |  947|          0.840|TRUE                 |TRUE                      |
-|chr1 |  81805592|  81805961|       0.617|     0.925|Intergenic   |       26296|ENSRNOT00000080840.1 |Arhgef1 |  984|          0.963|TRUE                 |TRUE                      |
-|chr1 | 198229110| 198230411|       0.522|     0.794|exon         |        3455|ENSRNOT00000087928.1 |Aldoa   | 2253|          0.707|TRUE                 |TRUE                      |
-|chr1 | 224977554| 224978112|       0.564|     0.789|intron       |       43915|ENSRNOT00000066823.2 |Wdr74   | 2542|          0.865|TRUE                 |TRUE                      |
+|chr  |    start|      end| mean_female| mean_male|annotation | dist.to.tss|nearest.promoter     |name    | bin| mean_estradiol|hypo_in_femaleVSmale |hypo_in_femaleVSestradiol |
+|:----|--------:|--------:|-----------:|---------:|:----------|-----------:|:--------------------|:-------|---:|--------------:|:--------------------|:-------------------------|
+|chr1 | 15705042| 15705893|       0.895|     0.672|intron     |      -77008|ENSRNOT00000088025.1 |Bclaf1  | 211|          0.659|FALSE                |FALSE                     |
+|chr1 | 15779390| 15779992|       0.453|     0.735|Intergenic |       -2784|ENSRNOT00000088025.1 |Bclaf1  | 212|          0.693|TRUE                 |TRUE                      |
+|chr1 | 20819921| 20821370|       0.853|     0.639|Intergenic |      141881|ENSRNOT00000079688.1 |Epb41l2 | 276|          0.590|FALSE                |FALSE                     |
+|chr1 | 20823100| 20823805|       0.675|     0.480|Intergenic |      139074|ENSRNOT00000079688.1 |Epb41l2 | 277|          0.506|FALSE                |FALSE                     |
+|chr1 | 20840455| 20840772|       0.788|     0.585|Intergenic |      121913|ENSRNOT00000079688.1 |Epb41l2 | 279|          0.514|FALSE                |FALSE                     |
+|chr1 | 20873382| 20875307|       0.726|     0.434|intron     |       88182|ENSRNOT00000079688.1 |Epb41l2 | 280|          0.457|FALSE                |FALSE                     |
 
-Within **all** the 75 regions, the methylation of male and estradiol are the same, and are different compared to female. This is good, because there isn't any filtering - they just happened to end up this way.
+Within the 186 regions, **all except 1** of the methylation of male and estradiol are the same, and are different compared to female. This is good, because there isn't any filtering - they just happened to end up this way.
 
 ## Look at DMRs that are potentially epigenetically regulating
 
@@ -459,8 +455,8 @@ Within **all** the 75 regions, the methylation of male and estradiol are the sam
 ```r
 # bsmooth_dt_all_DMR_overlap_final %>% head %>% kable("markdown")
 
-final_DE_genes <- read.table(file = "../Data_Analysis/RNAseq_result/DE_genes/femVSfemZeb_glmQLFit_DE_genes.tsv", header=TRUE) %>%
-  select(gene, name = V7)
+final_DE_genes <- read.table(file = "../Data_Analysis/RNAseq_result/DE_genes/3.1-femVSfemZeb_glmQLFit_DE_genes.tsv", header=TRUE) %>%
+  select(gene, name)
 
 bsmooth_dt_all_DMR_overlap_final <- bsmooth_dt_all_DMR_overlap %>%
   inner_join(., final_table) %>%
@@ -489,107 +485,69 @@ bsmooth_dt_all_DMR_overlap_final <- bsmooth_dt_all_DMR_overlap %>%
 ```r
 rn6_de_genes_track <- fread("../methylation_data/homer/rn6_tss_raw.gtf", skip = 1) %>%
   # filter(V1 %in% final_DE_genes$gene) %>%
-  # filter(V1 %in% bsmooth_dt_all_DMR_overlap_final$gene) %>%
+  filter(V1 %in% (bssmooth_dt_maleVsFemale_DMR_annotated$nearest.promoter %>% as.character %>% unique)) %>%
   select(chr = V2, start = V4, end = V5, gene = V1)
 
 rn6_genes_track <- fread("../methylation_data/homer/rn6_tss_raw.gtf", skip = 1) %>%
-  select(chr = V2, start = V4, end = V5, gene = V1)
+  select(chr = V2, start = V4, end = V5, strand = V3, gene = V1) %>%
+  filter(chr %in% rn6_de_genes_track$chr)
 
 x <- table(bsmooth_dt_all_DMR_overlap_final$deVSall)
 
-bsmooth_dt_all_DMR_overlap_final %>% kable("markdown")
+bsmooth_dt_all_DMR_overlap_final %>% head %>% kable("markdown")
 ```
 
 
 
-|chr   |     start|       end|annotation   | dist.to.tss|gene                 |name           |hypo_in_femaleVSall |gExp_up_in_femaleVSmale |deVSall |
-|:-----|---------:|---------:|:------------|-----------:|:--------------------|:--------------|:-------------------|:-----------------------|:-------|
-|chr1  |  15779390|  15779992|Intergenic   |       -2784|ENSRNOT00000088025.1 |Bclaf1         |TRUE                |TRUE                    |TRUE    |
-|chr1  |  80072086|  80073449|promoter-TSS |         456|ENSRNOT00000021456.2 |Gipr           |TRUE                |TRUE                    |FALSE   |
-|chr1  | 198229110| 198230411|exon         |        3455|ENSRNOT00000087928.1 |Aldoa          |TRUE                |TRUE                    |FALSE   |
-|chr10 |   3316884|   3318162|intron       |      -24975|ENSRNOT00000086929.1 |Mpv17l         |TRUE                |TRUE                    |FALSE   |
-|chr10 |  46594075|  46594169|promoter-TSS |       -1113|ENSRNOT00000047053.6 |Srebf1         |TRUE                |TRUE                    |FALSE   |
-|chr10 |  64364941|  64365403|intron       |      -24106|ENSRNOT00000082825.1 |Vps53          |TRUE                |TRUE                    |FALSE   |
-|chr10 |  82791822|  82791968|Intergenic   |       46096|ENSRNOT00000005311.6 |Col1a1         |TRUE                |TRUE                    |FALSE   |
-|chr10 |  85051230|  85051912|Intergenic   |       -2240|ENSRNOT00000012538.5 |Tbx21          |TRUE                |TRUE                    |TRUE    |
-|chr10 |  85086831|  85087403|Intergenic   |      -37786|ENSRNOT00000012538.5 |Tbx21          |TRUE                |TRUE                    |TRUE    |
-|chr10 | 104409632| 104410187|Intergenic   |      -27737|ENSRNOT00000035001.6 |n/a            |TRUE                |TRUE                    |FALSE   |
-|chr10 | 109502106| 109502623|Intergenic   |       18482|ENSRNOT00000054976.4 |Actg1          |TRUE                |TRUE                    |TRUE    |
-|chr13 |  44635511|  44636412|intron       |       20410|ENSRNOT00000082439.1 |Rab3gap1       |TRUE                |TRUE                    |FALSE   |
-|chr13 |  68815101|  68817995|intron       |      -30788|ENSRNOT00000086460.1 |Swt1           |FALSE               |FALSE                   |FALSE   |
-|chr13 |  79819503|  79819767|Intergenic   |      -18266|ENSRNOT00000084058.1 |Suco           |FALSE               |FALSE                   |FALSE   |
-|chr13 | 113921002| 113922112|intron       |      -49460|ENSRNOT00000084320.1 |Cr1l           |FALSE               |FALSE                   |FALSE   |
-|chr15 |   4928927|   4929293|intron       |       22760|ENSRNOT00000082196.1 |Nid2           |FALSE               |FALSE                   |FALSE   |
-|chr15 |  61677824|  61678114|intron       |      -14355|ENSRNOT00000015517.5 |Kbtbd6         |TRUE                |TRUE                    |TRUE    |
-|chr15 |  61682395|  61683201|intron       |       -9526|ENSRNOT00000015517.5 |Kbtbd6         |TRUE                |TRUE                    |TRUE    |
-|chr16 |  63918547|  63920115|intron       |       38905|ENSRNOT00000058727.4 |Nrg1           |FALSE               |FALSE                   |FALSE   |
-|chr17 |  55348594|  55349317|Intergenic   |       -2676|ENSRNOT00000025037.8 |Svil           |TRUE                |TRUE                    |FALSE   |
-|chr18 |  15542888|  15543214|Intergenic   |       -2874|ENSRNOT00000022113.4 |Ttr            |TRUE                |TRUE                    |FALSE   |
-|chr18 |  26629432|  26630480|intron       |       26923|ENSRNOT00000086729.1 |Epb41l4a       |FALSE               |FALSE                   |TRUE    |
-|chr19 |  10471017|  10471392|Intergenic   |      -21018|ENSRNOT00000088048.1 |Adgrg1         |TRUE                |TRUE                    |FALSE   |
-|chr2  |  26778990|  26779597|Intergenic   |       39386|ENSRNOT00000074326.1 |AABR07007744.1 |FALSE               |FALSE                   |FALSE   |
-|chr2  |  26798463|  26801141|Intergenic   |       18877|ENSRNOT00000074326.1 |AABR07007744.1 |FALSE               |FALSE                   |FALSE   |
-|chr20 |  46654980|  46655463|intron       |      -12231|ENSRNOT00000065890.1 |Sesn1          |TRUE                |TRUE                    |FALSE   |
-|chr3  | 170569405| 170570106|Intergenic   |       19443|ENSRNOT00000006991.5 |Tfap2c         |TRUE                |TRUE                    |TRUE    |
-|chr4  | 140247500| 140247753|promoter-TSS |         293|ENSRNOT00000041130.5 |Itpr1          |TRUE                |TRUE                    |FALSE   |
-|chr4  | 181435857| 181435960|intron       |        1098|ENSRNOT00000002520.7 |Mrps35         |TRUE                |TRUE                    |FALSE   |
-|chr6  | 135783292| 135784253|intron       |       46181|ENSRNOT00000080623.1 |Cdc42bpb       |TRUE                |TRUE                    |FALSE   |
-|chr6  | 135831163| 135831471|promoter-TSS |       -1364|ENSRNOT00000080623.1 |Cdc42bpb       |TRUE                |TRUE                    |FALSE   |
-|chr7  | 126652424| 126654866|intron       |       11695|ENSRNOT00000078928.1 |Ppara          |TRUE                |TRUE                    |FALSE   |
-|chr7  | 129838910| 129840440|Intergenic   |      -20437|ENSRNOT00000085835.1 |Pim3           |TRUE                |TRUE                    |FALSE   |
-|chr7  | 143985533| 143986187|Intergenic   |      -18997|ENSRNOT00000018828.3 |Sp7            |TRUE                |TRUE                    |FALSE   |
-|chr8  |  23414981|  23415347|intron       |      -24391|ENSRNOT00000071846.2 |Anln           |FALSE               |FALSE                   |FALSE   |
-|chr8  | 115182636| 115182875|intron       |       -3564|ENSRNOT00000017224.6 |Parp3          |TRUE                |TRUE                    |FALSE   |
+|chr  |     start|       end|annotation   | dist.to.tss|gene                 |name    |hypo_in_femaleVSall |gExp_up_in_femaleVSmale |deVSall |
+|:----|---------:|---------:|:------------|-----------:|:--------------------|:-------|:-------------------|:-----------------------|:-------|
+|chr1 |  15779390|  15779992|Intergenic   |       -2784|ENSRNOT00000088025.1 |Bclaf1  |TRUE                |TRUE                    |TRUE    |
+|chr1 |  21041530|  21041976|Intergenic   |      -79227|ENSRNOT00000079688.1 |Epb41l2 |TRUE                |TRUE                    |TRUE    |
+|chr1 |  80072086|  80073449|promoter-TSS |         456|ENSRNOT00000021456.2 |Gipr    |TRUE                |TRUE                    |FALSE   |
+|chr1 |  81879373|  81880430|intron       |      100421|ENSRNOT00000080840.1 |Arhgef1 |FALSE               |FALSE                   |FALSE   |
+|chr1 | 188256844| 188256977|intron       |      116661|ENSRNOT00000075020.1 |Knop1   |FALSE               |FALSE                   |TRUE    |
+|chr1 | 188512745| 188513024|intron       |     -139313|ENSRNOT00000075020.1 |Knop1   |FALSE               |FALSE                   |TRUE    |
 
-There are 8 regions that associated with genes that are DE in all conditions, and 28 regions that only associated with genes that are DE between male and female (`deVSall` column)
+There are 36 regions that associated with genes that are DE in all conditions, and 58 regions that only associated with genes that are DE between male and female (`deVSall` column)
 
 
 ```r
 final_DMR_set <- bsmooth_dt_all_DMR_overlap_final %>%
-  filter(abs(dist.to.tss) < 50000)
+  filter(annotation != "intron", annotation != "exon") %>%
+  filter(abs(dist.to.tss) < 150000)
 
-final_DMR_set_visualize <- final_DMR_set %>%
-  filter(!deVSall) %>%
-  left_join(., rn6_genes_track, by = "gene") %>%
-  mutate(start = pmin(start.x, start.y),
-         end = pmax(end.x, end.y))
-
-regions_final_DMR_set <- makeGRangesFromDataFrame(final_DMR_set_visualize, seqnames.field = "chr.x", keep.extra.columns = T)
+write.table(bsmooth_dt_all_DMR_overlap_final, file = "../methylation_data/3-all_gene_associated_DMRs.tsv", row.names = F, quote = F, sep = "\t")
 ```
+
+
 
 
 ```r
-pdf("../methylation_data/final_DMR_plots.pdf")
-for (i in seq_along(regions_final_DMR_set)) {
-  title <- paste("Transcript", regions_final_DMR_set$gene[i], "for gene", regions_final_DMR_set$name[i])
-  plotRegion(BSseq = bssmooth_smooth, region = regions_final_DMR_set[i], extend = 10000, addRegions = makeGRangesFromDataFrame(final_DMR_set), main = title,
-             annoTrack = list(
-               de = makeGRangesFromDataFrame(rn6_de_genes_track),
-               genes= makeGRangesFromDataFrame(rn6_genes_track)
-             ))
-}
-dev.off()
-```
+rn6_promoters <- rn6_genes_track %>%
+  makeGRangesFromDataFrame(keep.extra.columns = T) %>%
+  promoters(upstream = 2000, downstream = 2000) %>%
+  as.data.frame() %>%
+  dplyr::rename(chr = seqnames)
 
-```
-## png 
-##   2
-```
-
-
-```r
-final_DMR_set_visualize <- final_DMR_set %>%
+final_DMR_set_visualize <- bsmooth_dt_all_DMR_overlap_final %>%
   filter(deVSall) %>%
-  left_join(., rn6_genes_track, by = "gene") %>%
+  left_join(., rn6_promoters, by = "gene") %>%
   mutate(start = pmin(start.x, start.y),
          end = pmax(end.x, end.y))
 
+bsmooth_dt_all_DMR_overlap_final %>%
+  filter(deVSall) %>%
+  write.table(file = "../methylation_data/3-DE_gene_associated_DMRs.tsv", row.names = F, quote = F, sep = "\t")
+```
+
+
+```r
 regions_final_DMR_set <- makeGRangesFromDataFrame(final_DMR_set_visualize, seqnames.field = "chr.x", keep.extra.columns = T)
 
-pdf("../methylation_data/final_DMR_plots_subset.pdf")
+pdf("../methylation_data/2-final_DMR_plots_allDE.pdf")
 for (i in seq_along(regions_final_DMR_set)) {
   title <- paste("Transcript", regions_final_DMR_set$gene[i], "for gene", regions_final_DMR_set$name[i])
-  plotRegion(BSseq = bssmooth_smooth, region = regions_final_DMR_set[i], extend = 10000, addRegions = makeGRangesFromDataFrame(final_DMR_set), main = title,
+  plotRegion(BSseq = bssmooth_smooth, region = regions_final_DMR_set[i], extend = 10000, addRegions = makeGRangesFromDataFrame(bsmooth_dt_all_DMR_overlap_final), main = title,
              annoTrack = list(
                de = makeGRangesFromDataFrame(rn6_de_genes_track),
                genes= makeGRangesFromDataFrame(rn6_genes_track)
@@ -605,7 +563,7 @@ dev.off()
 
 
 ```r
-save.image("../Data_Analysis/2-DMRs.RData")
+save.image("../Data_Analysis/2-DMRs.RData", compress = F)
 ```
 
 

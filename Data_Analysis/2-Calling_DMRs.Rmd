@@ -344,7 +344,7 @@ bsmooth_dt_all_DMR_overlap_final <- bsmooth_dt_all_DMR_overlap %>%
 
 rn6_de_genes_track <- fread("../methylation_data/homer/rn6_tss_raw.gtf", skip = 1) %>%
   # filter(V1 %in% final_DE_genes$gene) %>%
-  # filter(V1 %in% bsmooth_dt_all_DMR_overlap_final$gene) %>%
+  filter(V1 %in% bssmooth_dt_maleVsFemale_DMR_annotated$nearest.promoter %>% unique) %>%
   select(chr = V2, start = V4, end = V5, gene = V1)
 
 rn6_genes_track <- fread("../methylation_data/homer/rn6_tss_raw.gtf", skip = 1) %>%
@@ -371,7 +371,7 @@ regions_final_DMR_set <- makeGRangesFromDataFrame(final_DMR_set_visualize, seqna
 ```
 
 ```{r, cache=TRUE}
-pdf("../methylation_data/final_DMR_plots.pdf")
+pdf("../methylation_data/2-final_DMR_plots_maleOnly.pdf")
 for (i in seq_along(regions_final_DMR_set)) {
   title <- paste("Transcript", regions_final_DMR_set$gene[i], "for gene", regions_final_DMR_set$name[i])
   plotRegion(BSseq = bssmooth_smooth, region = regions_final_DMR_set[i], extend = 10000, addRegions = makeGRangesFromDataFrame(final_DMR_set), main = title,
@@ -392,7 +392,7 @@ final_DMR_set_visualize <- final_DMR_set %>%
 
 regions_final_DMR_set <- makeGRangesFromDataFrame(final_DMR_set_visualize, seqnames.field = "chr.x", keep.extra.columns = T)
 
-pdf("../methylation_data/final_DMR_plots_subset.pdf")
+pdf("../methylation_data/2-final_DMR_plots_allDE.pdf")
 for (i in seq_along(regions_final_DMR_set)) {
   title <- paste("Transcript", regions_final_DMR_set$gene[i], "for gene", regions_final_DMR_set$name[i])
   plotRegion(BSseq = bssmooth_smooth, region = regions_final_DMR_set[i], extend = 10000, addRegions = makeGRangesFromDataFrame(final_DMR_set), main = title,

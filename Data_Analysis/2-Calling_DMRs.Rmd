@@ -11,12 +11,13 @@ output:
 require(data.table)
 require(foreach)
 require(doMC)
+require(GenomicRanges)
 require(bsseq)
 require(ggplot2)
 require(tidyr)
 require(knitr)
 require(dplyr)
-require(GenomicRanges)
+require(pheatmap)
 ```
 
 # Merge data
@@ -318,7 +319,7 @@ Within all `r nrow(tabulate)` regions, the methylation of male and female+zeb ar
 
 ```{r}
 bsmooth_dt_all_DMR_overlap_final <- bsmooth_dt_all_DMR_overlap %>%
-  # inner_join(., final_table) %>%
+  inner_join(., final_table) %>%
   select(chr, start, end, annotation, dist.to.tss, gene, name, hypo_in_femaleVSall = hypo_in_female, gExp_up_in_femaleVSmale = gExp_up_in_female) %>%
   unique()
 
@@ -372,6 +373,8 @@ final_DMR_set_visualize <- final_DMR_set %>%
   left_join(., rn6_genes_track, by = "gene") %>%
   mutate(start = pmin(start.x, start.y),
          end = pmax(end.x, end.y))
+
+final_DMR_set_visualize %>% kable("markdown")
 
 regions_final_DMR_set <- makeGRangesFromDataFrame(final_DMR_set_visualize, seqnames.field = "chr.x", keep.extra.columns = T)
 

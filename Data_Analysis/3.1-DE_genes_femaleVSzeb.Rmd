@@ -85,7 +85,20 @@ venn(list(
 ))
 ```
 
+### Save intermediate gene list of femaleVSfemale+zeb
+
+```{r}
+edgeR_QL_results %>%
+  round(3) %>%
+  add_rownames("gene") %>%
+  filter(FDR < 0.05) %>% 
+  write.table(file = "../Data_Analysis/RNAseq_result/DE_genes/3.1-femVSfemZeb_allDE_genes.tsv", row.names = F, col.names = T, quote = F, sep = "\t")
+```
+
+
 ## Get final gene list
+
+Genes that are DE between female VS male or zeb
 
 ```{r}
 final_dualDE_genes <- edgeR_QL_results %>%
@@ -146,7 +159,24 @@ final <- final_dualDE_genes %>%
   filter(gExp_up_in_FemaleVSzeb == gExp_up_in_femaleVSmale) %>%
   mutate(gExp_up_in_FemaleVSall = gExp_up_in_FemaleVSzeb) %>%
   select(gene, name, gExp_up_in_FemaleVSall)
-head(final) %>% kable("markdown")
-final %>%
+
+gExp <- rnaseq %>%
+  select(-starts_with("Male_zeb")) %>%
+  subset(rownames(.) %in% gene_list) %>%
+  DGEList() %>%
+  cpm() %>% 
+  as.data.frame() %>%
+  add_rownames("gene") %>%
+  gather(key = sample, value = gExp, -gene) %>%
+  mutate(group = gsub("\\_[1-9]", "", sample)) %>%
+  group_by(gene, group) %>%
+  summarize(mean = mean(gExp) %>% round(3)) %>%
+  spread(key = group, value = mean) %>%
+  ungroup() %>%
+  inner_join(., final, by = "gene")
+
+head(gExp) %>% kable("markdown")
+
+gExp %>%
   write.table(file = "../Data_Analysis/RNAseq_result/DE_genes/3.1-femVSfemZeb_glmQLFit_DE_genes.tsv", row.names = F, col.names = T, quote = F, sep = "\t")
 ```

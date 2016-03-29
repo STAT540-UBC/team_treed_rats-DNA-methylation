@@ -35,7 +35,7 @@ colnames(rnaseq) <- with(rnaseq_meta, paste(V3, V4, 1:12, sep = "_"))
 
 rnaseq_meta$samples <- with(rnaseq_meta, paste(V3, V4, 1:12, sep = "_"))
 
-rn6_gene <- read.table("rn6_genes.txt") %>% tbl_df() %>%
+rn6_gene <- read.table("../Data_Analysis/rn6_genes.txt") %>% tbl_df() %>%
   select(gene = V1, V7) %>% 
   unique()
 ```
@@ -51,12 +51,13 @@ rnaseq_subset <- rnaseq %>%
 edgeR_DGElist_females <- rnaseq_subset %>%
   select(contains("female")) %>%
   DGEList(group = rep(c("f","fz"), each = 3)) %>%
-  calcNormFactors(method = "TMM") 
+  calcNormFactors() 
 
 design_matrix <- rnaseq_meta %>% filter(V3 == "Female") %>% model.matrix(~V4, .)
 rownames(design_matrix) <- edgeR_DGElist_females$samples %>% rownames()
 
-edgeR_DGElist_females_trends <- edgeR_DGElist_females %>%
+edgeR_DGElist_females_trends <- edgeR_DGElist_females %>% 
+  # estimateDisp(design_matrix)
   estimateGLMCommonDisp(design_matrix, verbose=TRUE) %>%
   estimateGLMTrendedDisp(design_matrix) %>%
   estimateGLMTagwiseDisp(design_matrix)
@@ -106,23 +107,23 @@ Female Vehicle and Female Zeb separate out nicely (based on spearman correlation
 
 
 ```r
-fitQL <- glmQLFit(edgeR_DGElist_females_trends, design_matrix) %>% glmLRT(coef = 2)
+fitQL <- glmQLFit(edgeR_DGElist_females_trends, design_matrix, robust = TRUE) %>% glmLRT(coef = 2)
 
-edgeR_QL_results <- topTags(fitQL, n = Inf) %>% as.data.frame()
+edgeR_QL_results <- topTags(fitQL, n = Inf, sort.by = "none") %>% as.data.frame()
 
 edgeR_QL_results %>% head() %>% kable("markdown")
 ```
 
 
 
-|                     |      logFC|    logCPM|       LR|    PValue|       FDR|
-|:--------------------|----------:|---------:|--------:|---------:|---------:|
-|ENSRNOT00000020926.5 |   5.332310| 14.290960| 78.21558| 0.0000000| 0.0000000|
-|ENSRNOT00000005311.6 |   3.360921| 14.294668| 37.59587| 0.0000000| 0.0000001|
-|ENSRNOT00000054976.4 | -10.505286| 10.802994| 29.64235| 0.0000001| 0.0000051|
-|ENSRNOT00000004956.4 |   2.547902| 14.180049| 23.17066| 0.0000015| 0.0001086|
-|ENSRNOT00000034599.1 |  -7.865521|  9.583199| 13.09802| 0.0002956| 0.0173226|
-|ENSRNOT00000018630.5 |  -1.819905| 14.584751| 12.47031| 0.0004135| 0.0201911|
+|                     |      logFC|    logCPM|        LR|    PValue|       FDR|
+|:--------------------|----------:|---------:|---------:|---------:|---------:|
+|ENSRNOT00000000139.7 |  0.8079189|  7.375103| 0.1404075| 0.7078763| 1.0000000|
+|ENSRNOT00000001133.5 |  0.1911905| 14.270560| 0.1463100| 0.7020869| 1.0000000|
+|ENSRNOT00000001437.6 | -5.2979373|  5.046596| 3.9079154| 0.0480592| 0.1948896|
+|ENSRNOT00000002376.8 |  7.8103256|  6.844818| 7.1069116| 0.0076787| 0.1406167|
+|ENSRNOT00000002520.7 | -0.2078180| 14.616657| 0.1729139| 0.6775350| 1.0000000|
+|ENSRNOT00000002636.7 |  0.1135677|  6.987493| 0.0026309| 0.9590925| 1.0000000|
 
 
 ```r
@@ -178,14 +179,14 @@ femVsfemZeb_edge_QL_final %>% head %>% kable("markdown")
 
 
 
-|gene                 |   logFC| logCPM|     LR| PValue|   FDR|
-|:--------------------|-------:|------:|------:|------:|-----:|
-|ENSRNOT00000020926.5 |   5.332| 14.291| 78.216|      0| 0.000|
-|ENSRNOT00000005311.6 |   3.361| 14.295| 37.596|      0| 0.000|
-|ENSRNOT00000054976.4 | -10.505| 10.803| 29.642|      0| 0.000|
-|ENSRNOT00000004956.4 |   2.548| 14.180| 23.171|      0| 0.000|
-|ENSRNOT00000034599.1 |  -7.866|  9.583| 13.098|      0| 0.017|
-|ENSRNOT00000018630.5 |  -1.820| 14.585| 12.470|      0| 0.020|
+|gene                 |  logFC| logCPM|     LR| PValue|   FDR|
+|:--------------------|------:|------:|------:|------:|-----:|
+|ENSRNOT00000001437.6 | -5.298|  5.047|  3.908|  0.048| 0.195|
+|ENSRNOT00000002376.8 |  7.810|  6.845|  7.107|  0.008| 0.141|
+|ENSRNOT00000004956.4 |  2.548| 14.180| 23.171|  0.000| 0.000|
+|ENSRNOT00000005311.6 |  3.361| 14.295| 37.596|  0.000| 0.000|
+|ENSRNOT00000006128.5 |  6.053|  5.489|  4.772|  0.029| 0.182|
+|ENSRNOT00000006624.7 |  3.742| 10.107|  5.545|  0.019| 0.178|
 
 ## Filter genes that are both either up or downregulated compared to female
 
@@ -240,7 +241,7 @@ Good, most genes are concordant
 
 
 ```r
-gene_list <- output_results_TF %>% filter(concordant) %>% .$gene
+gene_list <- output_results_TF %>% .$gene
 plot_heatmap <- subset(rnaseq, rownames(rnaseq) %in% gene_list) %>% select(-starts_with("male_zeb"))
 plot_heatmap <- log(plot_heatmap+1, base=10)
 

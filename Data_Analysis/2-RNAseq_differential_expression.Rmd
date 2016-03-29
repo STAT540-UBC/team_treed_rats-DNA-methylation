@@ -161,11 +161,11 @@ venn(list(
 ## Check for cannonical gene that should be differentially expressed
 
 ```{r}
-rn6_gene <- read.table("rn6_genes.txt") %>% tbl_df() %>%
+rn6_gene <- read.table("../Data_Analysis/rn6_genes.txt") %>% tbl_df() %>%
   select(gene = V1, V7) %>% 
   unique()
 
-cannonical_gene <- c("Prl", "Xist", "Dby", "Eif2s3y", "Rps4y2", "Smcy", "Uty")
+cannonical_gene <- c("Prl", "Xist", "Dby", "Eif2s3y", "Rps4y2", "Smcy", "Uty", "Eif2s3")
 
 rn6_gene_interest <- rn6_gene %>%
   filter(V7 %in% cannonical_gene)
@@ -178,7 +178,7 @@ right_join(rn6_gene, edgeR_results %>% add_rownames("gene"), by = "gene")  %>%
   filter(gene %in% rn6_gene_interest$gene) %>% kable("markdown")
 ```
 
-Looks like 2 of our 4 cannonical genes are differentially expressed. Yay!
+Looks like some of cannonical genes are differentially expressed. Yay!
 
 ```{r}
 write.table(edgeR_QL_results %>% subset(FDR<0.05) %>% rownames(.), file = "/projects/epigenomics/users/thui/stat540/methylation_data/homer/de_transcripts.txt", row.names = F, col.names = F, quote = F)

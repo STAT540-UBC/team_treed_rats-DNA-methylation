@@ -73,7 +73,7 @@ save(bssmooth_smooth, bssmooth_dt, file = "../methylation_data/bssmooth_smooth.R
 ```r
 load("/projects/epigenomics/users/thui/stat540/methylation_data/bssmooth_smooth.RData")
 
-rn6_genes <- fread("homer/rn6_tss_raw.gtf", skip = 1) %>%
+rn6_genes <- fread("../methylation_data/homer/rn6_tss_raw.gtf", skip = 1) %>%
   select(nearest.promoter = V1, name = V7) %>% as.data.frame() %>% tbl_df() 
 ```
 
@@ -147,17 +147,17 @@ bssmooth_dt_maleVsFemale_DMR <- bssmooth_dt_maleVsFemale_dCPG %>%
 
 ```r
 # save(bssmooth_dt_maleVsFemale_DMR, file = "methylation_data/maleVSfemaleDMRs.RData")
-write.csv(x = bssmooth_dt_maleVsFemale_DMR, file = "maleVSfemaleDMRs.csv", quote = F, row.names = F)
+write.csv(x = bssmooth_dt_maleVsFemale_DMR, file = "../methylation_data/maleVSfemaleDMRs.csv", quote = F, row.names = F)
 
-write.table(x = bssmooth_dt_maleVsFemale_DMR %>% select(bin,chr,start,end) %>% mutate(strand = "+"), file = "homer/maleVSfemaleDMRs.bed", quote = F, row.names = F, col.names = F, sep = "\t")
+write.table(x = bssmooth_dt_maleVsFemale_DMR %>% select(bin,chr,start,end) %>% mutate(strand = "+"), file = "../methylation_data/homer/maleVSfemaleDMRs.bed", quote = F, row.names = F, col.names = F, sep = "\t")
 
-system("cd homer; sh get_DE_tss.sh")
-system("cd homer; sh homer_annotate.sh maleVSfemaleDMRs.bed")
+system("cd ../methylation_data/homer; sh get_DE_tss.sh")
+system("cd ../methylation_data/homer; sh homer_annotate.sh maleVSfemaleDMRs.bed")
 ```
 
 
 ```r
-bssmooth_dt_maleVsFemale_DMR_annotated <- read.table("homer/maleVSfemaleDMRs.bed.annotated", header = T, sep = "\t", quote="")
+bssmooth_dt_maleVsFemale_DMR_annotated <- read.table("../methylation_data/homer/maleVSfemaleDMRs.bed.annotated", header = T, sep = "\t", quote="")
 
 bssmooth_dt_maleVsFemale_DMR_annotated <- bssmooth_dt_maleVsFemale_DMR_annotated %>%
   select(1:11) %>%
@@ -192,13 +192,13 @@ maleVsFemale_DMR_genes <- inner_join(bssmooth_dt_maleVsFemale_DMR_annotated, rn6
 ### Remove irrelevant DMRs
 
 * Remove DMRs that are promoters of other genes
-* Remove DMRs < 50000 away from nearest promoter
+* Remove DMRs that are > 20000 bp away from nearest promoter
 
 
 ```r
 maleVsFemale_DMR_genes_filtered <- maleVsFemale_DMR_genes %>%
   mutate(annotation = gsub("\\(.*", "", annotation) %>% gsub(" ", "", .)) %>%
-  filter(abs(dist.to.tss) < 50000) %>%
+  filter(abs(dist.to.tss) < 20000) %>%
   # filter(slope_clusters < 0.1) %>%
   filter(ifelse(grepl("promoter-TSS", annotation), abs(dist.to.tss) < 3000, TRUE))
 
@@ -242,7 +242,7 @@ table(dmr_set$epi_regulation)
 ```
 ## 
 ## FALSE  TRUE 
-##   103    79
+##    46    40
 ```
 
 ```r
@@ -377,11 +377,11 @@ bsmooth_dt_all_DMR_overlap_final <- bsmooth_dt_all_DMR_overlap %>%
 final_DE_genes <- read.table(file = "../Data_Analysis/RNAseq_result/DE_genes/femVSfemZeb_glmQLFit_DE_genes.tsv", header=TRUE) %>%
   select(gene, name = V7)
 
-rn6_de_genes_track <- fread("homer/rn6_tss_raw.gtf", skip = 1) %>%
+rn6_de_genes_track <- fread("../methylation_data/homer/rn6_tss_raw.gtf", skip = 1) %>%
   filter(V1 %in% final_DE_genes$gene) %>%
   select(chr = V2, start = V4, end = V5, gene = V1)
 
-rn6_genes_track <- fread("homer/rn6_tss_raw.gtf", skip = 1) %>%
+rn6_genes_track <- fread("../methylation_data/homer/rn6_tss_raw.gtf", skip = 1) %>%
   select(chr = V2, start = V4, end = V5, gene = V1)
 ```
 
@@ -417,6 +417,7 @@ final_DMR_set %>% kable("markdown")
 |chr10 | 109502106| 109502623|Intergenic |       18482|ENSRNOT00000054976.4 |Actg1  |TRUE           |TRUE              |
 |chr15 |  61677824|  61678114|intron     |      -14355|ENSRNOT00000015517.5 |Kbtbd6 |TRUE           |TRUE              |
 |chr15 |  61682395|  61683201|intron     |       -9526|ENSRNOT00000015517.5 |Kbtbd6 |TRUE           |TRUE              |
+|chr15 | 106271544| 106272596|intron     |       14422|ENSRNOT00000072538.2 |Ipo5   |TRUE           |TRUE              |
 |chr3  | 170569405| 170570106|Intergenic |       19443|ENSRNOT00000006991.5 |Tfap2c |TRUE           |TRUE              |
 
 ```r
@@ -430,7 +431,7 @@ regions_final_DMR_set <- makeGRangesFromDataFrame(final_DMR_set_visualize, seqna
 
 
 ```r
-pdf("final_DMR_plots.pdf")
+pdf("../methylation_data/final_DMR_plots.pdf")
 for (i in seq_along(regions_final_DMR_set)) {
   title <- paste("Transcript", regions_final_DMR_set$gene[i], "for gene", regions_final_DMR_set$name[i])
   plotRegion(BSseq = bssmooth_smooth, region = regions_final_DMR_set[i], extend = 10000, addRegions = makeGRangesFromDataFrame(final_DMR_set), main = title,

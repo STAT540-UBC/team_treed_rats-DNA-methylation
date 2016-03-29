@@ -1,4 +1,4 @@
-setwd("RNASeq_data/new_data_Tony_TPM")
+setwd("../RNASeq_data/new_data_Tony_TPM")
 dir()
 rm(list = ls())
 
@@ -114,7 +114,7 @@ genes.de.fdr.05
 rm(list = ls())
 
 ###Raw counts
-datn <- read.table(file="RNAseq_new_merged_raw.txt", header = TRUE)
+datn <- read.table(file="../RNASeq_data/new_data_Tony_TPM/RNAseq_new_merged_raw.txt", header = TRUE)[,c(1:3, 7:9)]
 #input counts need to be integer so that rounding all entries into the next integer
 datn <- round(datn, digits = 0)
 
@@ -273,7 +273,7 @@ topTable(limmafiteB, coef="group2", sort.by="p")
 
 ##find out genes with a specific fdr 0.05
 
-limmafitHits <- topTable(limmafiteB, coef="group2", n = Inf, p.value= 0.05)
+limmafitHits <- topTable(limmafiteB, coef=2, n = Inf, p.value= 0.05)
 limmafitHits 
 (voomcounts.de <- nrow(limmafitHits))
 

@@ -235,11 +235,11 @@ venn(list(
 
 
 ```r
-rn6_gene <- read.table("rn6_genes.txt") %>% tbl_df() %>%
+rn6_gene <- read.table("../Data_Analysis/rn6_genes.txt") %>% tbl_df() %>%
   select(gene = V1, V7) %>% 
   unique()
 
-cannonical_gene <- c("Prl", "Xist", "Dby", "Eif2s3y", "Rps4y2", "Smcy", "Uty")
+cannonical_gene <- c("Prl", "Xist", "Dby", "Eif2s3y", "Rps4y2", "Smcy", "Uty", "Eif2s3")
 
 rn6_gene_interest <- rn6_gene %>%
   filter(V7 %in% cannonical_gene)
@@ -248,14 +248,17 @@ rn6_gene_interest
 ```
 
 ```
-## Source: local data frame [4 x 2]
+## Source: local data frame [7 x 2]
 ## 
 ##                   gene      V7
 ##                 (fctr)  (fctr)
 ## 1 ENSRNOT00000043543.2  Rps4y2
-## 2 ENSRNOT00000082648.1     Uty
-## 3 ENSRNOT00000088593.1 Eif2s3y
-## 4 ENSRNOT00000023412.4     Prl
+## 2 ENSRNOT00000092019.1  Eif2s3
+## 3 ENSRNOT00000082421.1  Eif2s3
+## 4 ENSRNOT00000081124.1  Eif2s3
+## 5 ENSRNOT00000082648.1     Uty
+## 6 ENSRNOT00000088593.1 Eif2s3y
+## 7 ENSRNOT00000023412.4     Prl
 ```
 
 
@@ -271,14 +274,17 @@ right_join(rn6_gene, edgeR_results %>% add_rownames("gene"), by = "gene")  %>%
 
 
 
-|gene                 |V7      |      logFC|    logCPM|           LR|    PValue| FDR|
-|:--------------------|:-------|----------:|---------:|------------:|---------:|---:|
-|ENSRNOT00000088593.1 |Eif2s3y | 14.0849243|  5.052356| 1522.3196810| 0.0000000|   0|
-|ENSRNOT00000082648.1 |Uty     | 12.2370844|  3.213748|  535.3964813| 0.0000000|   0|
-|ENSRNOT00000023412.4 |Prl     | -1.9171102| -3.920518|    1.4054463| 0.2358138|   1|
-|ENSRNOT00000043543.2 |Rps4y2  | -0.0269466|  2.445583|    0.0081392| 0.9281144|   1|
+|gene                 |V7      |      logFC|    logCPM|           LR|    PValue|       FDR|
+|:--------------------|:-------|----------:|---------:|------------:|---------:|---------:|
+|ENSRNOT00000088593.1 |Eif2s3y | 14.0849243|  5.052356| 1522.3196810| 0.0000000| 0.0000000|
+|ENSRNOT00000082648.1 |Uty     | 12.2370844|  3.213748|  535.3964813| 0.0000000| 0.0000000|
+|ENSRNOT00000092019.1 |Eif2s3  | -0.6685926|  7.768833|   60.4312632| 0.0000000| 0.0000000|
+|ENSRNOT00000082421.1 |Eif2s3  | -1.2990460|  1.077635|    7.5110934| 0.0061320| 0.6555738|
+|ENSRNOT00000081124.1 |Eif2s3  | -0.2894436|  3.161998|    2.0916644| 0.1481046| 1.0000000|
+|ENSRNOT00000023412.4 |Prl     | -1.9171102| -3.920518|    1.4054463| 0.2358138| 1.0000000|
+|ENSRNOT00000043543.2 |Rps4y2  | -0.0269466|  2.445583|    0.0081392| 0.9281144| 1.0000000|
 
-Looks like 2 of our 4 cannonical genes are differentially expressed. Yay!
+Looks like some of cannonical genes are differentially expressed. Yay!
 
 
 ```r

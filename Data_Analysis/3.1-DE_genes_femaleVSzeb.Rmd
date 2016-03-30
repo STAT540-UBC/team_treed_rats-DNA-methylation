@@ -42,7 +42,8 @@ rn6_gene <- read.table("../Data_Analysis/rn6_genes.txt") %>% tbl_df() %>%
 ```{r}
 edgeR_DGElist_females <- rnaseq %>%
   select(contains("female")) %>%
-  DGEList(group = rep(c("f","fz"), each = 3)) %>%
+  DGEList(group = rep(c("f","fz"), each = 3), remove.zeros = TRUE) %>%
+  .[rowSums(cpm(.) > 0.3) >= 2, , keep.lib.sizes=FALSE] %>%
   calcNormFactors() 
 
 design_matrix <- rnaseq_meta %>% filter(V3 == "Female") %>% model.matrix(~V4, .)
@@ -55,25 +56,21 @@ edgeR_DGElist_females_trends <- edgeR_DGElist_females %>%
   estimateGLMTagwiseDisp(design_matrix)
 
 plotBCV(edgeR_DGElist_females_trends)
-plotMDS.DGEList(edgeR_DGElist_females_trends)
+# plotMDS.DGEList(edgeR_DGElist_females_trends)
 ```
 
 ## Call DEGs
 
 ```{r}
-fitQL <- glmQLFit(edgeR_DGElist_females_trends, design_matrix, robust = TRUE) %>% glmLRT(coef = 2)
+fitQL <- glmQLFit(edgeR_DGElist_females_trends, design_matrix) %>% glmLRT(coef = 2)
 
-edgeR_QL_results <- topTags(fitQL, n = Inf) %>% as.data.frame()
+edgeR_QL_results <- topTags(fitQL, n = Inf) %>% as.data.frame() 
 
 edgeR_QL_results %>% head() %>% kable("markdown")
 ```
 
 ```{r}
-qplot(edgeR_QL_results$PValue)
-```
-
-```{r, echo=F}
-paste("there are", nrow(filter(edgeR_QL_results, FDR < 0.05)), "DE genes at FDR < 0.05")
+qplot(edgeR_QL_results$PValue, geom="density")
 ```
 
 ## Check overlaps
@@ -94,7 +91,6 @@ edgeR_QL_results %>%
   filter(FDR < 0.05) %>% 
   write.table(file = "../Data_Analysis/RNAseq_result/DE_genes/3.1-femVSfemZeb_allDE_genes.tsv", row.names = F, col.names = T, quote = F, sep = "\t")
 ```
-
 
 ## Get final gene list
 
@@ -140,14 +136,14 @@ Color scale represents `log10(count+1)`
 
 ```{r, fig.width=5, fig.height=14, dpi=150}
 pheatmap(log(plot_heatmap+1, 10), show_rownames = T, cluster_cols = hclust(as.dist(1-cor(plot_heatmap, method = "spearman")), method = "ward.D2"), clustering_method = "ward.D2",
-         color = colorRampPalette(c("#ffffb2", "#feb24c", "#bd0026"))(9))
+         color = colorRampPalette(c("#ffffb2", "#feb24c", "#bd0026"))(15))
 ```
 
 Try z-score normalization within rows.
 
 ```{r, fig.width=5, fig.height=14, dpi=150}
 pheatmap(log(plot_heatmap+1, 10), show_rownames = T, scale = "row", cluster_cols = hclust(as.dist(1-cor(plot_heatmap, method = "spearman")), method = "ward.D2"), clustering_method = "ward.D2",
-         color = colorRampPalette(c("#4575b4", "#abd9e9", "#ffffbf", "#fdae61", "#d73027"))(9))
+         color = colorRampPalette(c("#4575b4", "#abd9e9", "#ffffbf", "#fdae61", "#d73027"))(15))
 ```
 
 ## save results
@@ -160,10 +156,11 @@ final <- final_dualDE_genes %>%
   mutate(gExp_up_in_FemaleVSall = gExp_up_in_FemaleVSzeb) %>%
   select(gene, name, gExp_up_in_FemaleVSall)
 
-gExp <- rnaseq %>%
-  select(-starts_with("Male_zeb")) %>%
-  subset(rownames(.) %in% gene_list) %>%
+gExp <- 
+  rnaseq %>%
+  # select(-starts_with("Male_zeb")) %>%
   DGEList() %>%
+  calcNormFactors() %>%
   cpm() %>% 
   as.data.frame() %>%
   add_rownames("gene") %>%
@@ -172,11 +169,13 @@ gExp <- rnaseq %>%
   group_by(gene, group) %>%
   summarize(mean = mean(gExp) %>% round(3)) %>%
   spread(key = group, value = mean) %>%
-  ungroup() %>%
+  ungroup() 
+
+gExp_final <- gExp %>%
   inner_join(., final, by = "gene")
 
-head(gExp) %>% kable("markdown")
+head(gExp_final) %>% kable("markdown")
 
-gExp %>%
+gExp_final %>%
   write.table(file = "../Data_Analysis/RNAseq_result/DE_genes/3.1-femVSfemZeb_glmQLFit_DE_genes.tsv", row.names = F, col.names = T, quote = F, sep = "\t")
 ```

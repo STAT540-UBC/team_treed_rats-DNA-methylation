@@ -12,8 +12,8 @@ require(bsseq)
 require(ggplot2)
 require(tidyr)
 require(knitr)
-require(dplyr)
 require(pheatmap)
+require(dplyr)
 ```
 
 # Merge data
@@ -224,10 +224,10 @@ head(maleVsFemale_DMR_genes_filtered) %>% kable("markdown")
 |:----|--------:|--------:|-----------:|---------:|:----------|-----------:|:--------------------|:------------|---:|
 |chr1 | 11898931| 11900042|       0.952|     0.732|Intergenic |      -64348|ENSRNOT00000074325.1 |LOC100909555 | 154|
 |chr1 | 11909558| 11909590|       0.818|     0.615|Intergenic |      -54260|ENSRNOT00000074325.1 |LOC100909555 | 155|
-|chr1 | 15705042| 15705893|       0.895|     0.672|intron     |      -77008|ENSRNOT00000088025.1 |Bclaf1       | 211|
-|chr1 | 15779390| 15779992|       0.453|     0.735|Intergenic |       -2784|ENSRNOT00000088025.1 |Bclaf1       | 212|
-|chr1 | 20819921| 20821370|       0.853|     0.639|Intergenic |      141881|ENSRNOT00000079688.1 |Epb41l2      | 276|
-|chr1 | 20823100| 20823805|       0.675|     0.480|Intergenic |      139074|ENSRNOT00000079688.1 |Epb41l2      | 277|
+|chr1 | 72802651| 72803270|       0.830|     0.589|Intergenic |      -86316|ENSRNOT00000034957.6 |Tnnt1        | 835|
+|chr1 | 72804700| 72805125|       0.574|     0.310|Intergenic |      -84364|ENSRNOT00000034957.6 |Tnnt1        | 836|
+|chr1 | 78449242| 78449805|       0.765|     0.566|Intergenic |       72476|ENSRNOT00000021223.4 |Arhgap35     | 914|
+|chr1 | 80068877| 80069226|       0.924|     0.696|intron     |        4172|ENSRNOT00000021456.2 |Gipr         | 946|
 
 ## Grab DMRs that are likely to ge epigenetically regulating
 
@@ -255,7 +255,7 @@ table(dmr_set$epi_regulation)
 ```
 ## 
 ## FALSE  TRUE 
-##   249   241
+##   139   128
 ```
 
 ```r
@@ -289,14 +289,14 @@ head(final_table) %>% kable("markdown")
 
 
 
-|chr  |    start|      end|annotation   | dist.to.tss|gene                 |name         |hypo_in_female |  logFC|   FDR|gExp_up_in_female |epi_regulation |
-|:----|--------:|--------:|:------------|-----------:|:--------------------|:------------|:--------------|------:|-----:|:-----------------|:--------------|
-|chr1 | 11898931| 11900042|Intergenic   |      -64348|ENSRNOT00000074325.1 |LOC100909555 |FALSE          |  1.138| 0.000|FALSE             |TRUE           |
-|chr1 | 11909558| 11909590|Intergenic   |      -54260|ENSRNOT00000074325.1 |LOC100909555 |FALSE          |  1.138| 0.000|FALSE             |TRUE           |
-|chr1 | 15779390| 15779992|Intergenic   |       -2784|ENSRNOT00000088025.1 |Bclaf1       |TRUE           | -6.028| 0.014|TRUE              |TRUE           |
-|chr1 | 21041530| 21041976|Intergenic   |      -79227|ENSRNOT00000079688.1 |Epb41l2      |TRUE           | -5.790| 0.024|TRUE              |TRUE           |
-|chr1 | 78449242| 78449805|Intergenic   |       72476|ENSRNOT00000021223.4 |Arhgap35     |FALSE          |  2.156| 0.000|FALSE             |TRUE           |
-|chr1 | 80072086| 80073449|promoter-TSS |         456|ENSRNOT00000021456.2 |Gipr         |TRUE           | -0.740| 0.008|TRUE              |TRUE           |
+|chr  |     start|       end|annotation   | dist.to.tss|gene                 |name         |hypo_in_female |  logFC|   FDR|gExp_up_in_female |epi_regulation |
+|:----|---------:|---------:|:------------|-----------:|:--------------------|:------------|:--------------|------:|-----:|:-----------------|:--------------|
+|chr1 |  11898931|  11900042|Intergenic   |      -64348|ENSRNOT00000074325.1 |LOC100909555 |FALSE          |  1.140| 0.000|FALSE             |TRUE           |
+|chr1 |  11909558|  11909590|Intergenic   |      -54260|ENSRNOT00000074325.1 |LOC100909555 |FALSE          |  1.140| 0.000|FALSE             |TRUE           |
+|chr1 |  78449242|  78449805|Intergenic   |       72476|ENSRNOT00000021223.4 |Arhgap35     |FALSE          |  2.151| 0.000|FALSE             |TRUE           |
+|chr1 |  80072086|  80073449|promoter-TSS |         456|ENSRNOT00000021456.2 |Gipr         |TRUE           | -0.739| 0.002|TRUE              |TRUE           |
+|chr1 | 174366200| 174366551|intron       |       44766|ENSRNOT00000065288.1 |Nrip3        |TRUE           | -0.444| 0.015|TRUE              |TRUE           |
+|chr1 | 198124288| 198124929|exon         |      108607|ENSRNOT00000087928.1 |Aldoa        |TRUE           | -0.651| 0.000|TRUE              |TRUE           |
 
 ```r
 write.table(final_table, file = "2_genes_DMR_associations.tsv", row.names = F, quote = F, sep = "\t")
@@ -391,7 +391,7 @@ bsmooth_dt_all_DMR_overlap <- (maleVsFemale_DMR_genes_filtered %>% arrange(chr, 
 bsmooth_dt_all_DMR_overlap$mean_estradiol <- bssmooth_dt_FemaleVsEstradiol_DMR_overlap$mean_estradiol
 ```
 
-There are 186 DMRs between femaleVSfemale+zeb that overlap with the 490 femaleVSmale DMRs close to DE genes.
+There are 100 DMRs between femaleVSfemale+zeb that overlap with the 267 femaleVSmale DMRs close to DE genes.
 
 ### Heatmap of these DMRs
 
@@ -428,8 +428,8 @@ table(tabulate$hypo_in_femaleVSmale == tabulate$hypo_in_femaleVSestradiol)
 
 ```
 ## 
-## FALSE  TRUE 
-##     1   185
+## TRUE 
+##  100
 ```
 
 ```r
@@ -438,16 +438,16 @@ head(tabulate) %>% kable("markdown")
 
 
 
-|chr  |    start|      end| mean_female| mean_male|annotation | dist.to.tss|nearest.promoter     |name    | bin| mean_estradiol|hypo_in_femaleVSmale |hypo_in_femaleVSestradiol |
-|:----|--------:|--------:|-----------:|---------:|:----------|-----------:|:--------------------|:-------|---:|--------------:|:--------------------|:-------------------------|
-|chr1 | 15705042| 15705893|       0.895|     0.672|intron     |      -77008|ENSRNOT00000088025.1 |Bclaf1  | 211|          0.659|FALSE                |FALSE                     |
-|chr1 | 15779390| 15779992|       0.453|     0.735|Intergenic |       -2784|ENSRNOT00000088025.1 |Bclaf1  | 212|          0.693|TRUE                 |TRUE                      |
-|chr1 | 20819921| 20821370|       0.853|     0.639|Intergenic |      141881|ENSRNOT00000079688.1 |Epb41l2 | 276|          0.590|FALSE                |FALSE                     |
-|chr1 | 20823100| 20823805|       0.675|     0.480|Intergenic |      139074|ENSRNOT00000079688.1 |Epb41l2 | 277|          0.506|FALSE                |FALSE                     |
-|chr1 | 20840455| 20840772|       0.788|     0.585|Intergenic |      121913|ENSRNOT00000079688.1 |Epb41l2 | 279|          0.514|FALSE                |FALSE                     |
-|chr1 | 20873382| 20875307|       0.726|     0.434|intron     |       88182|ENSRNOT00000079688.1 |Epb41l2 | 280|          0.457|FALSE                |FALSE                     |
+|chr  |     start|       end| mean_female| mean_male|annotation   | dist.to.tss|nearest.promoter     |name      |  bin| mean_estradiol|hypo_in_femaleVSmale |hypo_in_femaleVSestradiol |
+|:----|---------:|---------:|-----------:|---------:|:------------|-----------:|:--------------------|:---------|----:|--------------:|:--------------------|:-------------------------|
+|chr1 |  80072086|  80073449|       0.598|     0.873|promoter-TSS |         456|ENSRNOT00000021456.2 |Gipr      |  947|          0.840|TRUE                 |TRUE                      |
+|chr1 |  91447247|  91448725|       0.009|     0.731|intron       |      140623|ENSRNOT00000050931.3 |LOC687679 | 1126|          0.650|TRUE                 |TRUE                      |
+|chr1 | 198229110| 198230411|       0.522|     0.794|exon         |        3455|ENSRNOT00000087928.1 |Aldoa     | 2253|          0.707|TRUE                 |TRUE                      |
+|chr1 | 224977554| 224978112|       0.564|     0.789|intron       |       43915|ENSRNOT00000066823.2 |Wdr74     | 2542|          0.865|TRUE                 |TRUE                      |
+|chr1 | 231599673| 231600550|       0.687|     0.883|Intergenic   |      -69325|ENSRNOT00000018272.8 |Tle4      | 2598|          0.885|TRUE                 |TRUE                      |
+|chr1 | 252722643| 252723888|       0.523|     0.870|Intergenic   |      126491|ENSRNOT00000025845.4 |Lipa      | 2822|          0.846|TRUE                 |TRUE                      |
 
-Within the 186 regions, **all except 1** of the methylation of male and estradiol are the same, and are different compared to female. This is good, because there isn't any filtering - they just happened to end up this way.
+Within the 100 regions, **all except 1** of the methylation of male and estradiol are the same, and are different compared to female. This is good, because there isn't any filtering - they just happened to end up this way.
 
 ## Look at DMRs that are potentially epigenetically regulating
 
@@ -499,16 +499,16 @@ bsmooth_dt_all_DMR_overlap_final %>% head %>% kable("markdown")
 
 
 
-|chr  |     start|       end|annotation   | dist.to.tss|gene                 |name    |hypo_in_femaleVSall |gExp_up_in_femaleVSmale |deVSall |
-|:----|---------:|---------:|:------------|-----------:|:--------------------|:-------|:-------------------|:-----------------------|:-------|
-|chr1 |  15779390|  15779992|Intergenic   |       -2784|ENSRNOT00000088025.1 |Bclaf1  |TRUE                |TRUE                    |TRUE    |
-|chr1 |  21041530|  21041976|Intergenic   |      -79227|ENSRNOT00000079688.1 |Epb41l2 |TRUE                |TRUE                    |TRUE    |
-|chr1 |  80072086|  80073449|promoter-TSS |         456|ENSRNOT00000021456.2 |Gipr    |TRUE                |TRUE                    |FALSE   |
-|chr1 |  81879373|  81880430|intron       |      100421|ENSRNOT00000080840.1 |Arhgef1 |FALSE               |FALSE                   |FALSE   |
-|chr1 | 188256844| 188256977|intron       |      116661|ENSRNOT00000075020.1 |Knop1   |FALSE               |FALSE                   |TRUE    |
-|chr1 | 188512745| 188513024|intron       |     -139313|ENSRNOT00000075020.1 |Knop1   |FALSE               |FALSE                   |TRUE    |
+|chr   |     start|       end|annotation   | dist.to.tss|gene                 |name         |hypo_in_femaleVSall |gExp_up_in_femaleVSmale |deVSall |
+|:-----|---------:|---------:|:------------|-----------:|:--------------------|:------------|:-------------------|:-----------------------|:-------|
+|chr1  |  80072086|  80073449|promoter-TSS |         456|ENSRNOT00000021456.2 |Gipr         |TRUE                |TRUE                    |TRUE    |
+|chr1  | 198229110| 198230411|exon         |        3455|ENSRNOT00000087928.1 |Aldoa        |TRUE                |TRUE                    |FALSE   |
+|chr1  | 252722643| 252723888|Intergenic   |      126491|ENSRNOT00000025845.4 |Lipa         |TRUE                |TRUE                    |FALSE   |
+|chr1  | 252724577| 252725416|Intergenic   |      124760|ENSRNOT00000025845.4 |Lipa         |TRUE                |TRUE                    |FALSE   |
+|chr10 |  38140754|  38142542|intron       |     -116711|ENSRNOT00000042688.2 |LOC100362027 |TRUE                |TRUE                    |TRUE    |
+|chr10 |  46594075|  46594169|promoter-TSS |       -1113|ENSRNOT00000047053.6 |Srebf1       |TRUE                |TRUE                    |FALSE   |
 
-There are 36 regions that associated with genes that are DE in all conditions, and 58 regions that only associated with genes that are DE between male and female (`deVSall` column)
+There are 13 regions that associated with genes that are DE in all conditions, and 42 regions that only associated with genes that are DE between male and female (`deVSall` column)
 
 
 ```r
@@ -554,11 +554,6 @@ for (i in seq_along(regions_final_DMR_set)) {
              ))
 }
 dev.off()
-```
-
-```
-## png 
-##   2
 ```
 
 

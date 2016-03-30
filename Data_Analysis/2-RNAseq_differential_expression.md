@@ -119,7 +119,8 @@ Seems like everything is normal, although there doesn't seem to be a clear separ
 edgeR_DGElist <- rnaseq %>%
   select(contains("vehicle")) %>%
   DGEList(group = rep(c("f","m"), each = 3)) %>%
-  calcNormFactors(method = "TMM") 
+  .[rowSums(cpm(.) > 0.3) >= 2, , keep.lib.sizes=FALSE] %>%
+  calcNormFactors()
 
 edgeR_DGElist_trends <- edgeR_DGElist %>%
   estimateGLMCommonDisp(limma_design_matrix, verbose=TRUE) %>%
@@ -128,7 +129,7 @@ edgeR_DGElist_trends <- edgeR_DGElist %>%
 ```
 
 ```
-## Disp = 0.03703 , BCV = 0.1924
+## Disp = 0.03377 , BCV = 0.1838
 ```
 
 ```r
@@ -138,10 +139,9 @@ plotBCV(edgeR_DGElist_trends)
 ![](2-RNAseq_differential_expression_files/figure-html/unnamed-chunk-7-1.png)
 
 ```r
-plotMDS.DGEList(edgeR_DGElist_trends)
+# plotMDS.DGEList(edgeR_DGElist_trends)
 ```
 
-![](2-RNAseq_differential_expression_files/figure-html/unnamed-chunk-7-2.png)
 
 ```r
 fit <- glmFit(edgeR_DGElist_trends, limma_design_matrix) %>% glmLRT(coef = 2)
@@ -155,12 +155,12 @@ edgeR_results %>% head() %>% kable("markdown")
 
 |                     |     logFC|   logCPM|        LR| PValue| FDR|
 |:--------------------|---------:|--------:|---------:|------:|---:|
-|ENSRNOT00000088593.1 | 14.084924| 5.052356| 1522.3197|      0|   0|
-|ENSRNOT00000092078.1 | 10.344881| 4.917585| 1451.6402|      0|   0|
-|ENSRNOT00000086056.1 | 10.268320| 4.840503| 1334.4100|      0|   0|
-|ENSRNOT00000082648.1 | 12.237084| 3.213748|  535.3965|      0|   0|
-|ENSRNOT00000075940.1 | -5.391451| 3.780004|  495.9766|      0|   0|
-|ENSRNOT00000088616.1 |  6.432642| 2.887048|  350.2675|      0|   0|
+|ENSRNOT00000088593.1 | 14.085475| 5.053390| 1540.5503|      0|   0|
+|ENSRNOT00000092078.1 | 10.345845| 4.918516| 1486.2852|      0|   0|
+|ENSRNOT00000086056.1 | 10.269165| 4.841341| 1354.0319|      0|   0|
+|ENSRNOT00000082648.1 | 12.237584| 3.214705|  534.3931|      0|   0|
+|ENSRNOT00000075940.1 | -5.390653| 3.780268|  495.2908|      0|   0|
+|ENSRNOT00000088616.1 |  6.433413| 2.887938|  347.9084|      0|   0|
 
 Once again, right-skewed Pvalues
 
@@ -169,7 +169,7 @@ Once again, right-skewed Pvalues
 qplot(edgeR_results$PValue, geom="density")
 ```
 
-![](2-RNAseq_differential_expression_files/figure-html/unnamed-chunk-8-1.png)
+![](2-RNAseq_differential_expression_files/figure-html/unnamed-chunk-9-1.png)
 
 ## Try edgeR with quasilinear fit
 
@@ -188,14 +188,14 @@ edgeR_QL_results %>% head() %>% kable("markdown")
 
 
 
-|                     |      logFC|   logCPM|        LR| PValue| FDR|
-|:--------------------|----------:|--------:|---------:|------:|---:|
-|ENSRNOT00000088593.1 |  14.084931| 5.052356| 1308.3694|      0|   0|
-|ENSRNOT00000092078.1 |  10.344666| 4.917585| 1158.9505|      0|   0|
-|ENSRNOT00000086056.1 |  10.268392| 4.840503| 1101.6075|      0|   0|
-|ENSRNOT00000028064.5 |  -6.820138| 3.710364|  499.9378|      0|   0|
-|ENSRNOT00000082648.1 |  12.237044| 3.213748|  477.0839|      0|   0|
-|ENSRNOT00000054976.4 | -12.016664| 3.006216|  445.4413|      0|   0|
+|                     |     logFC|   logCPM|        LR| PValue| FDR|
+|:--------------------|---------:|--------:|---------:|------:|---:|
+|ENSRNOT00000088593.1 | 14.085478| 5.053390| 1481.2323|      0|   0|
+|ENSRNOT00000092078.1 | 10.345750| 4.918516| 1333.8447|      0|   0|
+|ENSRNOT00000086056.1 | 10.269186| 4.841341| 1274.7826|      0|   0|
+|ENSRNOT00000028064.5 | -6.819740| 3.711348|  528.2253|      0|   0|
+|ENSRNOT00000082648.1 | 12.237531| 3.214705|  456.0808|      0|   0|
+|ENSRNOT00000075940.1 | -5.389753| 3.780268|  445.5320|      0|   0|
 
 Once again, right-skewed Pvalues
 
@@ -204,7 +204,7 @@ Once again, right-skewed Pvalues
 qplot(edgeR_QL_results$PValue, geom="density")
 ```
 
-![](2-RNAseq_differential_expression_files/figure-html/unnamed-chunk-10-1.png)
+![](2-RNAseq_differential_expression_files/figure-html/unnamed-chunk-11-1.png)
 
 ## Summary of results
 
@@ -214,11 +214,11 @@ qplot(edgeR_QL_results$PValue, geom="density")
 ```
 
 ```
-## [1] "there are 299 DE genes from edgeR glmQLFit"
+## [1] "there are 164 DE genes from edgeR glmQLFit"
 ```
 
 ```
-## [1] "there are 61 DE genes from edgeR glmFit"
+## [1] "there are 52 DE genes from edgeR glmFit"
 ```
 
 ```r
@@ -229,7 +229,7 @@ venn(list(
 ))
 ```
 
-![](2-RNAseq_differential_expression_files/figure-html/unnamed-chunk-12-1.png)
+![](2-RNAseq_differential_expression_files/figure-html/unnamed-chunk-13-1.png)
 
 ## Check for cannonical gene that should be differentially expressed
 
@@ -263,7 +263,7 @@ rn6_gene_interest
 
 
 ```r
-right_join(rn6_gene, edgeR_results %>% add_rownames("gene"), by = "gene")  %>%
+right_join(rn6_gene, edgeR_QL_results %>% add_rownames("gene"), by = "gene")  %>%
   filter(gene %in% rn6_gene_interest$gene) %>% kable("markdown")
 ```
 
@@ -274,15 +274,14 @@ right_join(rn6_gene, edgeR_results %>% add_rownames("gene"), by = "gene")  %>%
 
 
 
-|gene                 |V7      |      logFC|    logCPM|           LR|    PValue|       FDR|
-|:--------------------|:-------|----------:|---------:|------------:|---------:|---------:|
-|ENSRNOT00000088593.1 |Eif2s3y | 14.0849243|  5.052356| 1522.3196810| 0.0000000| 0.0000000|
-|ENSRNOT00000082648.1 |Uty     | 12.2370844|  3.213748|  535.3964813| 0.0000000| 0.0000000|
-|ENSRNOT00000092019.1 |Eif2s3  | -0.6685926|  7.768833|   60.4312632| 0.0000000| 0.0000000|
-|ENSRNOT00000082421.1 |Eif2s3  | -1.2990460|  1.077635|    7.5110934| 0.0061320| 0.6555738|
-|ENSRNOT00000081124.1 |Eif2s3  | -0.2894436|  3.161998|    2.0916644| 0.1481046| 1.0000000|
-|ENSRNOT00000023412.4 |Prl     | -1.9171102| -3.920518|    1.4054463| 0.2358138| 1.0000000|
-|ENSRNOT00000043543.2 |Rps4y2  | -0.0269466|  2.445583|    0.0081392| 0.9281144| 1.0000000|
+|gene                 |V7      |      logFC|   logCPM|           LR|    PValue|       FDR|
+|:--------------------|:-------|----------:|--------:|------------:|---------:|---------:|
+|ENSRNOT00000088593.1 |Eif2s3y | 14.0854776| 5.053390| 1481.2322959| 0.0000000| 0.0000000|
+|ENSRNOT00000082648.1 |Uty     | 12.2375307| 3.214705|  456.0808042| 0.0000000| 0.0000000|
+|ENSRNOT00000092019.1 |Eif2s3  | -0.6675812| 7.769330|   48.0627245| 0.0000000| 0.0000000|
+|ENSRNOT00000082421.1 |Eif2s3  | -1.2963958| 1.077961|    8.8985483| 0.0028540| 0.2480257|
+|ENSRNOT00000081124.1 |Eif2s3  | -0.2888773| 3.162468|    1.4936701| 0.2216479| 0.9999732|
+|ENSRNOT00000043543.2 |Rps4y2  | -0.0252202| 2.446263|    0.0075271| 0.9308630| 0.9999732|
 
 Looks like some of cannonical genes are differentially expressed. Yay!
 
@@ -337,4 +336,4 @@ venn(list(
 ))
 ```
 
-![](2-RNAseq_differential_expression_files/figure-html/unnamed-chunk-18-1.png)
+![](2-RNAseq_differential_expression_files/figure-html/unnamed-chunk-19-1.png)

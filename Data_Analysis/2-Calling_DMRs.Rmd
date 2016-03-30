@@ -16,8 +16,8 @@ require(bsseq)
 require(ggplot2)
 require(tidyr)
 require(knitr)
-require(dplyr)
 require(pheatmap)
+require(dplyr)
 ```
 
 # Merge data

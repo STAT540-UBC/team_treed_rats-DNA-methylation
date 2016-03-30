@@ -99,7 +99,8 @@ Seems like everything is normal, although there doesn't seem to be a clear separ
 edgeR_DGElist <- rnaseq %>%
   select(contains("vehicle")) %>%
   DGEList(group = rep(c("f","m"), each = 3)) %>%
-  calcNormFactors(method = "TMM") 
+  .[rowSums(cpm(.) > 0.3) >= 2, , keep.lib.sizes=FALSE] %>%
+  calcNormFactors()
 
 edgeR_DGElist_trends <- edgeR_DGElist %>%
   estimateGLMCommonDisp(limma_design_matrix, verbose=TRUE) %>%
@@ -108,8 +109,10 @@ edgeR_DGElist_trends <- edgeR_DGElist %>%
 
 plotBCV(edgeR_DGElist_trends)
 
-plotMDS.DGEList(edgeR_DGElist_trends)
+# plotMDS.DGEList(edgeR_DGElist_trends)
+```
 
+```{r}
 fit <- glmFit(edgeR_DGElist_trends, limma_design_matrix) %>% glmLRT(coef = 2)
 
 edgeR_results <- topTags(fit, n = Inf) %>% as.data.frame()
@@ -174,7 +177,7 @@ rn6_gene_interest
 ```
 
 ```{r}
-right_join(rn6_gene, edgeR_results %>% add_rownames("gene"), by = "gene")  %>%
+right_join(rn6_gene, edgeR_QL_results %>% add_rownames("gene"), by = "gene")  %>%
   filter(gene %in% rn6_gene_interest$gene) %>% kable("markdown")
 ```
 

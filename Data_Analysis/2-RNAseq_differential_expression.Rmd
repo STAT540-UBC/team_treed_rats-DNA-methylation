@@ -59,13 +59,17 @@ limma_design_matrix <- model.matrix(~V3, samples)
 
 rownames(limma_design_matrix) <- samples$samples
 
-voom_rnaseq <- rnaseq %>%
+voom_DGElist <- rnaseq %>%
   select(contains("vehicle")) %>%
+  DGEList(group = rep(c("f","m"), each = 3)) %>%
+  .[rowSums(cpm(.) > 0.3) >= 2, , keep.lib.sizes=FALSE]
+
+voom_rnaseq <- voom_DGElist %>%
   voom(design = limma_design_matrix, plot = T)
 
-fit <- lmFit(object = voom_rnaseq, design = limma_design_matrix) %>% eBayes()
+fit_limma <- lmFit(object = voom_rnaseq, design = limma_design_matrix) %>% eBayes()
 
-limma_results <- topTable(fit, adjust="fdr", number = Inf)
+limma_results <- topTable(fit_limma, adjust="fdr", number = Inf)
 ```
 
 Pvalues are skewed to the right
@@ -184,7 +188,7 @@ right_join(rn6_gene, edgeR_QL_results %>% add_rownames("gene"), by = "gene")  %>
 Looks like some of cannonical genes are differentially expressed. Yay!
 
 ```{r}
-write.table(edgeR_QL_results %>% subset(FDR<0.05) %>% rownames(.), file = "/projects/epigenomics/users/thui/stat540/methylation_data/homer/de_transcripts.txt", row.names = F, col.names = F, quote = F)
+# write.table(edgeR_QL_results %>% subset(FDR<0.05) %>% rownames(.), file = "/projects/epigenomics/users/thui/stat540/methylation_data/homer/de_transcripts.txt", row.names = F, col.names = F, quote = F)
 ```
 ```{r}
 edge_QL_final <- edgeR_QL_results %>% subset(FDR<0.05) %>% add_rownames("gene")
@@ -207,13 +211,35 @@ write.table(output_results, file = "../Data_Analysis/RNAseq_result/DE_genes/glmQ
 
 ## Compare vs NOIse-seq
 
-```{r}
-noise_degenes <- read.table("../Data_Analysis/RNAseq_result/DE_genes/noise_seq_DEgenes.txt", header = T)
+```{r, warning=FALSE}
+rnaseq_samples <- rnaseq %>%select(contains("vehicle"))
+
+library(NOISeq)
+
+noiseq_factors <- data.frame(gender = rep(c("female", "male"), each=3), row.names = colnames(rnaseq_samples))
+
+noiseq_data <- readData(data = rnaseq_samples, factors = noiseq_factors)
+
+noiseq_results <- noiseqbio(input = noiseq_data, factor = "gender", norm = "tmm", filter = 1)
+
+noiseq_hits <- degenes(noiseq_results)
+
+DE.plot(output = noiseq_results, q = 0.95, graphic = "expr")
 ```
 ```{r}
-venn(list(
-  edgeR_QL = edgeR_QL_results %>% subset(FDR<0.05) %>% rownames(.),
-  noiseSeq = noise_degenes$gene,
-  edgeR = edgeR_results %>% subset(FDR<0.05) %>% rownames(.)
+x<-venn(list(
+  edgeR_glmQLFit = edgeR_QL_results %>% subset(FDR<0.05) %>% rownames(.),
+  noiseSeq = rownames(noiseq_hits),
+  edgeR_glmFit = edgeR_results %>% subset(FDR<0.05) %>% rownames(.)
 ))
+x <- attr(x, "intersection")
 ```
+
+
+```{r, eval=FALSE}
+full_data <- rnaseq_samples %>%
+  DGEList(group = rep(c("f","m"), each = 3))
+
+cpm(full_data) %>% subset(rownames(.) %in% x$noiseSeq) %>% round(2) %>% kable("markdown")
+```
+

@@ -60,17 +60,21 @@ limma_design_matrix <- model.matrix(~V3, samples)
 
 rownames(limma_design_matrix) <- samples$samples
 
-voom_rnaseq <- rnaseq %>%
+voom_DGElist <- rnaseq %>%
   select(contains("vehicle")) %>%
+  DGEList(group = rep(c("f","m"), each = 3)) %>%
+  .[rowSums(cpm(.) > 0.3) >= 2, , keep.lib.sizes=FALSE]
+
+voom_rnaseq <- voom_DGElist %>%
   voom(design = limma_design_matrix, plot = T)
 ```
 
 ![](2-RNAseq_differential_expression_files/figure-html/unnamed-chunk-4-1.png)
 
 ```r
-fit <- lmFit(object = voom_rnaseq, design = limma_design_matrix) %>% eBayes()
+fit_limma <- lmFit(object = voom_rnaseq, design = limma_design_matrix) %>% eBayes()
 
-limma_results <- topTable(fit, adjust="fdr", number = Inf)
+limma_results <- topTable(fit_limma, adjust="fdr", number = Inf)
 ```
 
 ```
@@ -210,7 +214,7 @@ qplot(edgeR_QL_results$PValue, geom="density")
 
 
 ```
-## [1] "there are 10 DE genes from limma"
+## [1] "there are 15 DE genes from limma"
 ```
 
 ```
@@ -276,18 +280,18 @@ right_join(rn6_gene, edgeR_QL_results %>% add_rownames("gene"), by = "gene")  %>
 
 |gene                 |V7      |      logFC|   logCPM|           LR|    PValue|       FDR|
 |:--------------------|:-------|----------:|--------:|------------:|---------:|---------:|
-|ENSRNOT00000088593.1 |Eif2s3y | 14.0854776| 5.053390| 1481.2322959| 0.0000000| 0.0000000|
-|ENSRNOT00000082648.1 |Uty     | 12.2375307| 3.214705|  456.0808042| 0.0000000| 0.0000000|
-|ENSRNOT00000092019.1 |Eif2s3  | -0.6675812| 7.769330|   48.0627245| 0.0000000| 0.0000000|
+|ENSRNOT00000088593.1 |Eif2s3y | 14.0854776| 5.053390| 1481.2322968| 0.0000000| 0.0000000|
+|ENSRNOT00000082648.1 |Uty     | 12.2375307| 3.214705|  456.0808041| 0.0000000| 0.0000000|
+|ENSRNOT00000092019.1 |Eif2s3  | -0.6675812| 7.769330|   48.0627248| 0.0000000| 0.0000000|
 |ENSRNOT00000082421.1 |Eif2s3  | -1.2963958| 1.077961|    8.8985483| 0.0028540| 0.2480257|
-|ENSRNOT00000081124.1 |Eif2s3  | -0.2888773| 3.162468|    1.4936701| 0.2216479| 0.9999732|
-|ENSRNOT00000043543.2 |Rps4y2  | -0.0252202| 2.446263|    0.0075271| 0.9308630| 0.9999732|
+|ENSRNOT00000081124.1 |Eif2s3  | -0.2888773| 3.162468|    1.4936701| 0.2216479| 0.9999733|
+|ENSRNOT00000043543.2 |Rps4y2  | -0.0252202| 2.446263|    0.0075271| 0.9308630| 0.9999733|
 
 Looks like some of cannonical genes are differentially expressed. Yay!
 
 
 ```r
-write.table(edgeR_QL_results %>% subset(FDR<0.05) %>% rownames(.), file = "/projects/epigenomics/users/thui/stat540/methylation_data/homer/de_transcripts.txt", row.names = F, col.names = F, quote = F)
+# write.table(edgeR_QL_results %>% subset(FDR<0.05) %>% rownames(.), file = "/projects/epigenomics/users/thui/stat540/methylation_data/homer/de_transcripts.txt", row.names = F, col.names = F, quote = F)
 ```
 
 ```r
@@ -325,15 +329,218 @@ write.table(output_results, file = "../Data_Analysis/RNAseq_result/DE_genes/glmQ
 
 
 ```r
-noise_degenes <- read.table("../Data_Analysis/RNAseq_result/DE_genes/noise_seq_DEgenes.txt", header = T)
+rnaseq_samples <- rnaseq %>%select(contains("vehicle"))
+
+library(NOISeq)
+```
+
+```
+## Loading required package: Biobase
+```
+
+```
+## Loading required package: BiocGenerics
+```
+
+```
+## Loading required package: parallel
+```
+
+```
+## 
+## Attaching package: 'BiocGenerics'
+```
+
+```
+## The following objects are masked from 'package:parallel':
+## 
+##     clusterApply, clusterApplyLB, clusterCall, clusterEvalQ,
+##     clusterExport, clusterMap, parApply, parCapply, parLapply,
+##     parLapplyLB, parRapply, parSapply, parSapplyLB
+```
+
+```
+## The following object is masked from 'package:limma':
+## 
+##     plotMA
+```
+
+```
+## The following objects are masked from 'package:dplyr':
+## 
+##     combine, intersect, setdiff, union
+```
+
+```
+## The following objects are masked from 'package:stats':
+## 
+##     IQR, mad, xtabs
+```
+
+```
+## The following objects are masked from 'package:base':
+## 
+##     anyDuplicated, append, as.data.frame, as.vector, cbind,
+##     colnames, do.call, duplicated, eval, evalq, Filter, Find, get,
+##     grep, grepl, intersect, is.unsorted, lapply, lengths, Map,
+##     mapply, match, mget, order, paste, pmax, pmax.int, pmin,
+##     pmin.int, Position, rank, rbind, Reduce, rownames, sapply,
+##     setdiff, sort, table, tapply, union, unique, unlist, unsplit
+```
+
+```
+## Welcome to Bioconductor
+## 
+##     Vignettes contain introductory material; view with
+##     'browseVignettes()'. To cite Bioconductor, see
+##     'citation("Biobase")', and for packages 'citation("pkgname")'.
+```
+
+```
+## Loading required package: splines
+```
+
+```
+## Loading required package: Matrix
+```
+
+```
+## Warning: package 'Matrix' was built under R version 3.2.4
+```
+
+```
+## 
+## Attaching package: 'Matrix'
+```
+
+```
+## The following object is masked from 'package:tidyr':
+## 
+##     expand
+```
+
+```
+## 
+## Attaching package: 'NOISeq'
+```
+
+```
+## The following object is masked from 'package:edgeR':
+## 
+##     rpkm
 ```
 
 ```r
-venn(list(
-  edgeR_QL = edgeR_QL_results %>% subset(FDR<0.05) %>% rownames(.),
-  noiseSeq = noise_degenes$gene,
-  edgeR = edgeR_results %>% subset(FDR<0.05) %>% rownames(.)
+noiseq_factors <- data.frame(gender = rep(c("female", "male"), each=3), row.names = colnames(rnaseq_samples))
+
+noiseq_data <- readData(data = rnaseq_samples, factors = noiseq_factors)
+
+noiseq_results <- noiseqbio(input = noiseq_data, factor = "gender", norm = "tmm", filter = 1, cpm = 0.3)
+```
+
+```
+## Computing Z values...
+## Filtering out low count features...
+## 26695 features are to be kept for differential expression analysis with filtering method 1
+## ...k-means clustering done
+## Size of 15 clusters:
+##  [1] 15758     9   137  4765  2615    46    85   530   880  1510     5
+## [12]    37   298     1    19
+## Resampling cluster...[1] 1
+```
+
+```
+## Warning: Quick-TRANSfer stage steps exceeded maximum (= 787900)
+```
+
+```
+## Warning: Quick-TRANSfer stage steps exceeded maximum (= 787900)
+
+## Warning: Quick-TRANSfer stage steps exceeded maximum (= 787900)
+
+## Warning: Quick-TRANSfer stage steps exceeded maximum (= 787900)
+
+## Warning: Quick-TRANSfer stage steps exceeded maximum (= 787900)
+
+## Warning: Quick-TRANSfer stage steps exceeded maximum (= 787900)
+
+## Warning: Quick-TRANSfer stage steps exceeded maximum (= 787900)
+
+## Warning: Quick-TRANSfer stage steps exceeded maximum (= 787900)
+
+## Warning: Quick-TRANSfer stage steps exceeded maximum (= 787900)
+```
+
+```
+## Size of 15 subclusters of cluster: 1
+##  [1]   38  632  206 6520    5  113  498  797 1061 1939  448  701  868 1342
+## [15]  590
+## [1] 2
+## [1] 3
+## [1] 4
+## Size of 15 subclusters of cluster: 4
+##  [1]   6   3 305 275 778 544  15 638 412 239  24 430 403 378 315
+## [1] 5
+## Size of 15 subclusters of cluster: 5
+##  [1] 241 143  24 182 295 252   2  23 368 211 160 286 125 165 138
+## [1] 6
+## [1] 7
+## [1] 8
+## [1] 9
+## [1] 10
+## Size of 15 subclusters of cluster: 10
+##  [1]   7  88   5  56 159 107  87  97  87 166 119 204 108  67 153
+## [1] 11
+## [1] 12
+## [1] 13
+## [1] 14
+## [1] 15
+## Computing Z for noise...
+## Computing probability of differential expression...
+## p0 = 0.426451208081965
+## Probability
+##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
+##   0.000   0.312   0.697   0.569   0.834   1.000    4202
+```
+
+```r
+noiseq_hits <- degenes(noiseq_results)
+```
+
+```
+## [1] "51 differentially expressed features"
+```
+
+```r
+DE.plot(output = noiseq_results, q = 0.95, graphic = "expr")
+```
+
+![](2-RNAseq_differential_expression_files/figure-html/unnamed-chunk-18-1.png)
+
+```
+## [1] "51 differentially expressed features"
+```
+
+```r
+x<-venn(list(
+  edgeR_glmQLFit = edgeR_QL_results %>% subset(FDR<0.05) %>% rownames(.),
+  noiseSeq = rownames(noiseq_hits),
+  edgeR_glmFit = edgeR_results %>% subset(FDR<0.05) %>% rownames(.)
 ))
 ```
 
 ![](2-RNAseq_differential_expression_files/figure-html/unnamed-chunk-19-1.png)
+
+```r
+x <- attr(x, "intersection")
+```
+
+
+
+```r
+full_data <- rnaseq_samples %>%
+  DGEList(group = rep(c("f","m"), each = 3))
+
+cpm(full_data) %>% subset(rownames(.) %in% x$noiseSeq) %>% round(2)
+```
+

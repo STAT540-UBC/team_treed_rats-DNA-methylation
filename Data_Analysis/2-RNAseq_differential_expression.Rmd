@@ -240,5 +240,8 @@ full_data <- rnaseq_samples %>%
   DGEList(group = rep(c("f","m"), each = 3))
 
 cpm(full_data) %>% subset(rownames(.) %in% x$noiseSeq) %>% round(2) %>% kable("markdown")
+
+cpm(full_data) %>% subset(rownames(.) %in% x$noiseSeq) %>% 
+  pheatmap(scale = "row")
 ```
 

@@ -440,3 +440,10 @@ cpm(full_data) %>% subset(rownames(.) %in% x$noiseSeq) %>% round(2) %>% kable("m
 |ENSRNOT00000089870.1 |             0.18|             0.00|             4.04|           0.00|           0.00|           0.00|
 |ENSRNOT00000090390.1 |             0.00|             0.00|             0.00|           0.00|           0.20|           0.00|
 
+```r
+cpm(full_data) %>% subset(rownames(.) %in% x$noiseSeq) %>% 
+  pheatmap(scale = "row")
+```
+
+![](2-RNAseq_differential_expression_files/figure-html/unnamed-chunk-20-1.png)
+

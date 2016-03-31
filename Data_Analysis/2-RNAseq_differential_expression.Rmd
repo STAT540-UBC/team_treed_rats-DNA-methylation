@@ -9,7 +9,7 @@ output:
 ---
 
 ```{r setup, message=FALSE, warning=FALSE}
-library(dplyr)
+library(NOISeq)
 library(ggplot2)
 require(tidyr)
 require(knitr)
@@ -17,6 +17,7 @@ require(limma)
 require(edgeR)
 require(gplots)
 require(pheatmap)
+library(dplyr)
 ```
 
 ```{r, eval=FALSE}
@@ -214,8 +215,6 @@ write.table(output_results, file = "../Data_Analysis/RNAseq_result/DE_genes/glmQ
 ```{r, warning=FALSE}
 rnaseq_samples <- rnaseq %>%select(contains("vehicle"))
 
-library(NOISeq)
-
 noiseq_factors <- data.frame(gender = rep(c("female", "male"), each=3), row.names = colnames(rnaseq_samples))
 
 noiseq_data <- readData(data = rnaseq_samples, factors = noiseq_factors)
@@ -236,7 +235,7 @@ x <- attr(x, "intersection")
 ```
 
 
-```{r, eval=FALSE}
+```{r, eval=TRUE}
 full_data <- rnaseq_samples %>%
   DGEList(group = rep(c("f","m"), each = 3))
 

@@ -4,7 +4,7 @@ March 8, 2016
 
 
 ```r
-library(dplyr)
+library(NOISeq)
 library(ggplot2)
 require(tidyr)
 require(knitr)
@@ -12,6 +12,7 @@ require(limma)
 require(edgeR)
 require(gplots)
 require(pheatmap)
+library(dplyr)
 ```
 
 
@@ -331,176 +332,51 @@ write.table(output_results, file = "../Data_Analysis/RNAseq_result/DE_genes/glmQ
 ```r
 rnaseq_samples <- rnaseq %>%select(contains("vehicle"))
 
-library(NOISeq)
-```
-
-```
-## Loading required package: Biobase
-```
-
-```
-## Loading required package: BiocGenerics
-```
-
-```
-## Loading required package: parallel
-```
-
-```
-## 
-## Attaching package: 'BiocGenerics'
-```
-
-```
-## The following objects are masked from 'package:parallel':
-## 
-##     clusterApply, clusterApplyLB, clusterCall, clusterEvalQ,
-##     clusterExport, clusterMap, parApply, parCapply, parLapply,
-##     parLapplyLB, parRapply, parSapply, parSapplyLB
-```
-
-```
-## The following object is masked from 'package:limma':
-## 
-##     plotMA
-```
-
-```
-## The following objects are masked from 'package:dplyr':
-## 
-##     combine, intersect, setdiff, union
-```
-
-```
-## The following objects are masked from 'package:stats':
-## 
-##     IQR, mad, xtabs
-```
-
-```
-## The following objects are masked from 'package:base':
-## 
-##     anyDuplicated, append, as.data.frame, as.vector, cbind,
-##     colnames, do.call, duplicated, eval, evalq, Filter, Find, get,
-##     grep, grepl, intersect, is.unsorted, lapply, lengths, Map,
-##     mapply, match, mget, order, paste, pmax, pmax.int, pmin,
-##     pmin.int, Position, rank, rbind, Reduce, rownames, sapply,
-##     setdiff, sort, table, tapply, union, unique, unlist, unsplit
-```
-
-```
-## Welcome to Bioconductor
-## 
-##     Vignettes contain introductory material; view with
-##     'browseVignettes()'. To cite Bioconductor, see
-##     'citation("Biobase")', and for packages 'citation("pkgname")'.
-```
-
-```
-## Loading required package: splines
-```
-
-```
-## Loading required package: Matrix
-```
-
-```
-## Warning: package 'Matrix' was built under R version 3.2.4
-```
-
-```
-## 
-## Attaching package: 'Matrix'
-```
-
-```
-## The following object is masked from 'package:tidyr':
-## 
-##     expand
-```
-
-```
-## 
-## Attaching package: 'NOISeq'
-```
-
-```
-## The following object is masked from 'package:edgeR':
-## 
-##     rpkm
-```
-
-```r
 noiseq_factors <- data.frame(gender = rep(c("female", "male"), each=3), row.names = colnames(rnaseq_samples))
 
 noiseq_data <- readData(data = rnaseq_samples, factors = noiseq_factors)
 
-noiseq_results <- noiseqbio(input = noiseq_data, factor = "gender", norm = "tmm", filter = 1, cpm = 0.3)
+noiseq_results <- noiseqbio(input = noiseq_data, factor = "gender", norm = "tmm", filter = 1)
 ```
 
 ```
 ## Computing Z values...
 ## Filtering out low count features...
-## 26695 features are to be kept for differential expression analysis with filtering method 1
+## 25022 features are to be kept for differential expression analysis with filtering method 1
 ## ...k-means clustering done
 ## Size of 15 clusters:
-##  [1] 15758     9   137  4765  2615    46    85   530   880  1510     5
-## [12]    37   298     1    19
+##  [1]    37   525   298    85   137    19 14245   871  2570  4701     5
+## [12]     9  1473    46     1
 ## Resampling cluster...[1] 1
-```
-
-```
-## Warning: Quick-TRANSfer stage steps exceeded maximum (= 787900)
-```
-
-```
-## Warning: Quick-TRANSfer stage steps exceeded maximum (= 787900)
-
-## Warning: Quick-TRANSfer stage steps exceeded maximum (= 787900)
-
-## Warning: Quick-TRANSfer stage steps exceeded maximum (= 787900)
-
-## Warning: Quick-TRANSfer stage steps exceeded maximum (= 787900)
-
-## Warning: Quick-TRANSfer stage steps exceeded maximum (= 787900)
-
-## Warning: Quick-TRANSfer stage steps exceeded maximum (= 787900)
-
-## Warning: Quick-TRANSfer stage steps exceeded maximum (= 787900)
-
-## Warning: Quick-TRANSfer stage steps exceeded maximum (= 787900)
-```
-
-```
-## Size of 15 subclusters of cluster: 1
-##  [1]   38  632  206 6520    5  113  498  797 1061 1939  448  701  868 1342
-## [15]  590
 ## [1] 2
 ## [1] 3
 ## [1] 4
-## Size of 15 subclusters of cluster: 4
-##  [1]   6   3 305 275 778 544  15 638 412 239  24 430 403 378 315
 ## [1] 5
-## Size of 15 subclusters of cluster: 5
-##  [1] 241 143  24 182 295 252   2  23 368 211 160 286 125 165 138
 ## [1] 6
 ## [1] 7
+## Size of 15 subclusters of cluster: 7
+##  [1]  535   40  596  481  693  482   13 1810  136  769  502 1038 5007 1289
+## [15]  854
 ## [1] 8
 ## [1] 9
+## Size of 15 subclusters of cluster: 9
+##  [1] 214 160 271 101  25 279 128 243  17   2 306 273 150 228 173
 ## [1] 10
 ## Size of 15 subclusters of cluster: 10
-##  [1]   7  88   5  56 159 107  87  97  87 166 119 204 108  67 153
+##  [1] 503 273 218 206 608 718 339 388   6 195 462 422  26   3 334
 ## [1] 11
 ## [1] 12
 ## [1] 13
+## Size of 15 subclusters of cluster: 13
+##  [1] 149  76  59 133  56  82 118  79   5  67 152  50 105 180 162
 ## [1] 14
 ## [1] 15
 ## Computing Z for noise...
 ## Computing probability of differential expression...
-## p0 = 0.426451208081965
+## p0 = 0.602640939155569
 ## Probability
 ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
-##   0.000   0.312   0.697   0.569   0.834   1.000    4202
+##   0.000   0.129   0.410   0.392   0.659   1.000    5875
 ```
 
 ```r
@@ -508,7 +384,7 @@ noiseq_hits <- degenes(noiseq_results)
 ```
 
 ```
-## [1] "51 differentially expressed features"
+## [1] "45 differentially expressed features"
 ```
 
 ```r
@@ -518,7 +394,7 @@ DE.plot(output = noiseq_results, q = 0.95, graphic = "expr")
 ![](2-RNAseq_differential_expression_files/figure-html/unnamed-chunk-18-1.png)
 
 ```
-## [1] "51 differentially expressed features"
+## [1] "45 differentially expressed features"
 ```
 
 ```r
@@ -541,6 +417,26 @@ x <- attr(x, "intersection")
 full_data <- rnaseq_samples %>%
   DGEList(group = rep(c("f","m"), each = 3))
 
-cpm(full_data) %>% subset(rownames(.) %in% x$noiseSeq) %>% round(2)
+cpm(full_data) %>% subset(rownames(.) %in% x$noiseSeq) %>% round(2) %>% kable("markdown")
 ```
+
+
+
+|                     | Female_vehicle_1| Female_vehicle_2| Female_vehicle_3| Male_vehicle_7| Male_vehicle_8| Male_vehicle_9|
+|:--------------------|----------------:|----------------:|----------------:|--------------:|--------------:|--------------:|
+|ENSRNOT00000008857.7 |             0.00|             0.50|             0.00|           0.00|           0.00|           0.00|
+|ENSRNOT00000012538.5 |             0.00|             0.06|             7.45|           0.00|           0.00|           0.03|
+|ENSRNOT00000013366.7 |             1.73|             0.00|             0.00|           0.00|           0.00|           0.00|
+|ENSRNOT00000034599.1 |            20.07|             0.03|             0.04|           0.07|           0.03|           0.08|
+|ENSRNOT00000051619.3 |             0.15|             0.12|             0.18|           0.00|           0.00|           0.00|
+|ENSRNOT00000054976.4 |            47.88|             0.00|             0.00|           0.00|           0.00|           0.00|
+|ENSRNOT00000058068.5 |             0.00|             0.00|             0.00|           0.68|           0.01|           0.00|
+|ENSRNOT00000066726.2 |             0.00|             0.00|             0.00|           0.14|           0.11|           0.10|
+|ENSRNOT00000072762.3 |             0.00|             0.00|             0.00|           3.83|           0.00|           0.00|
+|ENSRNOT00000072786.2 |             0.00|             0.00|             1.64|           0.00|           0.00|           0.00|
+|ENSRNOT00000083593.1 |             0.32|             0.51|             0.09|           0.00|           0.01|           0.00|
+|ENSRNOT00000083841.1 |             0.00|             0.00|             0.00|           0.00|           0.00|           0.13|
+|ENSRNOT00000087897.1 |             0.65|             0.00|             0.00|           0.00|           0.00|           0.00|
+|ENSRNOT00000089870.1 |             0.18|             0.00|             4.04|           0.00|           0.00|           0.00|
+|ENSRNOT00000090390.1 |             0.00|             0.00|             0.00|           0.00|           0.20|           0.00|
 

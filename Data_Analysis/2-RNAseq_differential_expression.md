@@ -28,9 +28,9 @@ rnaseq <- read.table(file="../RNASeq_data/new_data_Tony_TPM/RNAseq_new_merged_ra
 
 rnaseq_meta <- read.table(file = "../RNASeq_data/new_data_Tony_TPM/sailfish_file_table.txt", stringsAsFactors = FALSE)
 
-colnames(rnaseq) <- with(rnaseq_meta, paste(V3, V4, 1:12, sep = "_"))
+colnames(rnaseq) <- with(rnaseq_meta, paste(V3, V4, rep(1:3, 3), sep = "_"))
 
-rnaseq_meta$samples <- with(rnaseq_meta, paste(V3, V4, 1:12, sep = "_"))
+rnaseq_meta$samples <- with(rnaseq_meta, paste(V3, V4, rep(1:3, 3), sep = "_"))
 ```
 
 ## Plot distribution of gExps
@@ -298,32 +298,33 @@ Looks like some of cannonical genes are differentially expressed. Yay!
 ```r
 edge_QL_final <- edgeR_QL_results %>% subset(FDR<0.05) %>% add_rownames("gene")
 
-output_results <- rnaseq_male_Female %>% 
-  filter(gene %in% edge_QL_final$gene) %>%
-  # head(100) %>%
-  group_by(gene, gender) %>%
-  summarize(log_mean_exp = mean(gExp) %>% round(digits = 2)) %>%
-  spread(key = gender, value = log_mean_exp) %>%
+edge_QL_final <- edge_QL_final %>%
+  select(gene, FDR)
+
+gExp <- 
+  rnaseq %>%
+  # select(contains("vehicle")) %>%
+  DGEList() %>%
+  calcNormFactors() %>%
+  cpm() %>% 
+  as.data.frame() %>%
+  add_rownames("gene") %>%
+  # filter(gene %in% edge_QL_final$gene) %>%
   inner_join(., edge_QL_final) %>%
-  mutate(gExp_up_in_female = Female > male) %>%
-  select(-LR, -logCPM, -Female, -male, -PValue) %>%
-  inner_join(., rn6_gene) %>%
-  mutate(logFC = round(logFC, 3),
-         FDR = round (FDR, 3))
+  gather(key = sample, value = gExp, -gene) %>%
+  mutate(group = gsub("\\_[1-9]", "", sample)) %>%
+  group_by(gene, group) %>%
+  summarize(mean = mean(gExp) %>% round(3)) %>%
+  spread(key = group, value = mean) %>%
+  ungroup() 
 ```
 
 ```
 ## Joining by: "gene"
-## Joining by: "gene"
-```
-
-```
-## Warning in inner_join_impl(x, y, by$x, by$y): joining character vector and
-## factor, coercing into character vector
 ```
 
 ```r
-write.table(output_results, file = "../Data_Analysis/RNAseq_result/DE_genes/glmQLFit_DE_genes.tsv", row.names = F, col.names = T, quote = F, sep = "\t")
+# write.table(gExp, file = "../Data_Analysis/RNAseq_result/DE_genes/maleVSfemale_glmQLFit_DE_genes.tsv", row.names = F, col.names = T, quote = F, sep = "\t")
 ```
 
 ## Compare vs NOIse-seq
@@ -411,6 +412,9 @@ x<-venn(list(
 x <- attr(x, "intersection")
 ```
 
+## Noticed that 15 genes are only called DE in `NOISeq`
+
+Let's take a look at these genes
 
 
 ```r
@@ -422,7 +426,7 @@ cpm(full_data) %>% subset(rownames(.) %in% x$noiseSeq) %>% round(2) %>% kable("m
 
 
 
-|                     | Female_vehicle_1| Female_vehicle_2| Female_vehicle_3| Male_vehicle_7| Male_vehicle_8| Male_vehicle_9|
+|                     | Female_vehicle_1| Female_vehicle_2| Female_vehicle_3| Male_vehicle_1| Male_vehicle_2| Male_vehicle_3|
 |:--------------------|----------------:|----------------:|----------------:|--------------:|--------------:|--------------:|
 |ENSRNOT00000008857.7 |             0.00|             0.50|             0.00|           0.00|           0.00|           0.00|
 |ENSRNOT00000012538.5 |             0.00|             0.06|             7.45|           0.00|           0.00|           0.03|
@@ -447,3 +451,8 @@ cpm(full_data) %>% subset(rownames(.) %in% x$noiseSeq) %>%
 
 ![](2-RNAseq_differential_expression_files/figure-html/unnamed-chunk-20-1.png)
 
+Basically all of them are only expressed in one sample, which may be a technical artifact. AKA these genes are no good, and shouldn't be considered. 
+
+## Grand conclusion
+
+Proceed with `glmQLFit` since it gives the most number of genes, presumably due to highest sensitivity

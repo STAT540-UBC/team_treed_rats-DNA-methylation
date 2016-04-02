@@ -135,14 +135,14 @@ rownames(plot_heatmap) <- labels$name
 Color scale represents `log10(count+1)`
 
 ```{r, fig.width=5, fig.height=14, dpi=150}
-pheatmap(log(plot_heatmap+1, 10), show_rownames = T, cluster_cols = hclust(as.dist(1-cor(plot_heatmap, method = "spearman")), method = "ward.D2"), clustering_method = "ward.D2",
+pheatmap(plot_heatmap, show_rownames = T, cluster_cols = hclust(as.dist(1-cor(plot_heatmap, method = "spearman")), method = "ward.D2"), clustering_method = "ward.D2",
          color = colorRampPalette(c("#ffffb2", "#feb24c", "#bd0026"))(15))
 ```
 
 Try z-score normalization within rows.
 
 ```{r, fig.width=5, fig.height=14, dpi=150}
-pheatmap(log(plot_heatmap+1, 10), show_rownames = T, scale = "row", cluster_cols = hclust(as.dist(1-cor(plot_heatmap, method = "spearman")), method = "ward.D2"), clustering_method = "ward.D2",
+pheatmap(plot_heatmap, show_rownames = T, scale = "row", cluster_cols = hclust(as.dist(1-cor(plot_heatmap, method = "spearman")), method = "ward.D2"), clustering_method = "ward.D2",
          color = colorRampPalette(c("#4575b4", "#abd9e9", "#ffffbf", "#fdae61", "#d73027"))(15))
 ```
 

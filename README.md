@@ -15,15 +15,9 @@ Github ID |  Name
 [@eclaks](https://github.com/eclaks) | Emma Laks (MSc, Genome Science and Tech)
 [@david-rattray](https://github.com/David-Rattray) |	David Rattray (MSc, Biochemistry)
 
+Our project is based on the paper ["Brain feminization requires active repression of masculinization via DNA methylation, Nugent et al 2015"](http://www.nature.com/neuro/journal/v18/n5/full/nn.3988.html).
 
-
-Our project is based on the paper "Brain feminization requires active repression of masculinization via DNA methylation, Nugent et al 2015", which can be found [here](http://www.nature.com/neuro/journal/v18/n5/full/nn.3988.html).
-
-Our [original project proposal](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/First%20Abstract/First_Abstract.md) gives the outline of the project.  
-
-
-**Proposal**
-=============
+Our [project proposal](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/Final%20Deliverables/originalproposal.md) gives the outline of the project.
 
 **Abstract**
 --------------
@@ -31,14 +25,14 @@ Male rats have lower DNA (cytosine-5)-methyltransferase 3A (DNMT3a) activity and
 
 **Motivation**
 ---------------
-The paper demonstrates that: 
+The paper by Nugent et al demonstrates that: 
 * Male rats have lower DNMT3a activity and DNA methylation than females
 * Inhibiting DNMT masculinized neuronal markers and sexual behaviour in female rats, and has no effect on male behaviour. Females with conditional knockout of isoform DNMT3 also display male sexual behaviour  
 * Even outside of the restricted period of development where they are sensitive to hormone therapy, DNMT inhibition still masculinizes females 
 * Some changes in gene expression are as a result of DNMT inhibition.
   + The authors did not, however, attempt to link these changes to their methylation data which is why we have selected to further evaluate this paper.
 
-**Goals**
+**Objectives**
 ----------
 Based on the data already collected from the paper we aim to:
 
@@ -60,8 +54,6 @@ The data provided from the [paper](http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi
 
 **Methodology and Division of Labour** 
 ---------------------------------------
-
-
 
 1. Firstly, [align WGBS reads and call methylation with bismark](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/issues/1) (**Tony**)
 2. At the same time… 

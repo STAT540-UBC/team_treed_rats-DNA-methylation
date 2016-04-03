@@ -78,11 +78,11 @@ The data provided from the [paper](http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi
 5. Select genes that overlap between 4a and 4b to form list of master list of gender genes that can be artificially altered via epigenetic reprogramming (**Tony**)
 6. To conclude, and properly answer the biological question we will describe cellular pathways in the master list in (5).
  + [Background research into rats, gender, epigenetics.](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/issues/16)  (**Emma L.**)
- + [For known genes, describe gene pathways](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/issues/19) (maybe using Gene Ontology) (**Emma L**)
- + For unknown genes (rat genomes are not well annotated) we will annotate using BLAST and in silico translation to identify them (**Emma L.**) 
+ + [For known genes, describe gene pathways and functions](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/issues/19) (using [GSEA](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/tree/master/Background_Research/GSEA), [UNIPROT](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/tree/master/Background_Research/annotation_Uniprot_lit)) (**Emma L**)
 7. Administrative tasks and preparation of deliverables:
  + [Project proposal](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/issues/6) - (**Everyone**)
  + Repo readme directories with arrangement (**Emma T., Emma L, Tony, Rashed**)
  + [Progress report](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/issues/20) (**Emma T.**)
- + [Poster](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/issues/23) (**Emma T., Emma L**)
+ + [Poster](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/issues/23) (**Emma L., Emma T., Tony**)
+ + Bibliography (**Emma L.**)
 8. Methodological research for explanation of the various statistical tools and methods used in the project (**Rashed**)

@@ -75,6 +75,6 @@ The data provided from the [paper](http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi
  + [Project proposal](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/issues/6) - (**Everyone**)
  + Repo readme directories with arrangement (**Emma T., Emma L, Tony, Rashed**)
  + [Progress report](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/issues/20) (**Emma T.**)
- + [Poster](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/issues/23) (**Emma L., Emma T., Tony**)
+ + [Poster](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/issues/23) (**Emma L., Emma T., Tony, Rashed**)
  + [Bibliography](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/Final%20Deliverables/bibliography.md) (**Emma L.**)
 8. Methodological research for explanation of the various statistical tools and methods used in the project (**Rashed**)

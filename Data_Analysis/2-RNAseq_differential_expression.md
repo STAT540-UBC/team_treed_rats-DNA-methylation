@@ -1,5 +1,5 @@
 # 2-RNAseq_differential_expression
-Tony Hui  
+Tony Hui  and Rashed
 March 8, 2016  
 
 
@@ -176,11 +176,16 @@ qplot(edgeR_results$PValue, geom="density")
 
 ![](2-RNAseq_differential_expression_files/figure-html/unnamed-chunk-9-1.png)
 
-## Try edgeR with quasilinear fit
 
-There is `glmFit` and `glmQLFit` - not sure the difference
+## Try edgeR with Negative Binomial quasi-likelihood(QL) fit
 
-Reference here: http://www.statsci.org/smyth/pubs/QLedgeRPreprint.pdf
+There is `glmFit` for the previous one and `glmQLFit` for this one which incorporates quasi-likelihood fitting. The main differences between these two are as follows:
+
+`glmQLFit` actually addresses two type of dispersions: one is the gene-specific dispersion modeled by QL dispersion parameter and another one is the NB dispersion parameter, the global one over all genes.
+
+"So the two dispersion parameters have different roles. The NB dispersion describes the overall biological variability across all genes. The square-root of the NB dispersion is known as the biological coefficient of variation. It represents the observed variation that is attributable to inherent variability in the biological system, in contrast to the Poisson variation from sequencing. The QL dispersion picks up any gene-specific variability above and below the overall level. " (Quoted from the reference below.) Both are incorporated in the glmQLFit. 
+
+For full reference with more discussion you can find the reference here: [Link](http://www.statsci.org/smyth/pubs/QLedgeRPreprint.pdf) 
 
 
 ```r

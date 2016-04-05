@@ -14,8 +14,8 @@ Emma Laks
 
 7. Ziller et al. Coverage recommendations for methylation analysis by whole-genome bisulfite sequencing. Nature Methods (2015) 12:230–232. [doi:10.1038/nmeth.3152](http://www.nature.com/nmeth/journal/v12/n3/full/nmeth.3152.html)
 
-8. Sanabra et al. Neuroanatomical distribution and neurochemical characterization of cells expressing adenylyl cyclase isoforms in mouse and rat brain. Journal of Chemical Neuroanatomy (2011) 41(1):43–54. [doi:10.1016/j.jchemneu.2010.11.001](http://www.sciencedirect.com/science/article/pii/S0891061810001535)
+8. Uittenbogaard et al. Expression of the bHLH transcription factor Tcf12 (ME1) gene is linked to the expansion of precursor cell populations during neurogenesis. Gene Expression Patterns (2002) 1(2):115–121. [doi:10.1016/S1567-133X(01)00022-9](http://www.sciencedirect.com/science/article/pii/S1567133X01000229)
 
-9. Visel et al. Comprehensive analysis of the expression patterns of the adenylate cyclase gene family in the developing and adult mouse brain. Journal of Comparative Neurology (2006) 496(5):684–697. [doi:10.1002/cne.20953](http://onlinelibrary.wiley.com/doi/10.1002/cne.20953/full)
+9. Sanabra et al. Neuroanatomical distribution and neurochemical characterization of cells expressing adenylyl cyclase isoforms in mouse and rat brain. Journal of Chemical Neuroanatomy (2011) 41(1):43–54. [doi:10.1016/j.jchemneu.2010.11.001](http://www.sciencedirect.com/science/article/pii/S0891061810001535)
 
-10. Uittenbogaard et al. Expression of the bHLH transcription factor Tcf12 (ME1) gene is linked to the expansion of precursor cell populations during neurogenesis. Gene Expression Patterns (2002) 1(2):115–121. [doi:10.1016/S1567-133X(01)00022-9](http://www.sciencedirect.com/science/article/pii/S1567133X01000229)
+10. Visel et al. Comprehensive analysis of the expression patterns of the adenylate cyclase gene family in the developing and adult mouse brain. Journal of Comparative Neurology (2006) 496(5):684–697. [doi:10.1002/cne.20953](http://onlinelibrary.wiley.com/doi/10.1002/cne.20953/full)

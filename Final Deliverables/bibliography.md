@@ -1,5 +1,7 @@
 Emma Laks
 
+#Bibliography
+
 1. Nugent et al. Brain feminization requires active repression of masculinization via DNA methylation, Nature Neuroscience (2015) 18:690–697. [doi:10.1038/nbt.2862](http://www.nature.com/neuro/journal/v18/n5/full/nn.3988.html)
 
 2. Matsuda et al. Epigenetic mechanisms are involved in sexual differentiation of the brain. Reviews in Endocrine and Metabolic Disorders (2012) 13(3):163-171. [doi:10.1007/s11154-012-9202-z](http://link.springer.com/article/10.1007/s11154-012-9202-z)

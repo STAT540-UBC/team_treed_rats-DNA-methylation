@@ -1,6 +1,6 @@
 ---
 title: "2-RNAseq_differential_expression"
-author: "Tony Hui"
+author: "Tony Hui and Rashed"
 date: "March 8, 2016"
 output: 
   html_document: 

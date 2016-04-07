@@ -5,7 +5,7 @@ This is the private repository of team **TREED** for their group project as part
 
 This is the repo for group project of **TEAM TREED**
 
-Our team members are: 
+Table 1. Our team members: 
 
 Github ID |  Name
 ---------|------------
@@ -21,7 +21,7 @@ Our [project proposal](https://github.com/STAT540-UBC/team_treed_rats-DNA-methyl
 
 **Abstract**
 --------------
-Male rats have lower DNA (cytosine-5)-methyltransferase 3A (DNMT3a) activity and DNA methylation than females. Nugent et al demonstrated using DNMT inhibitors or conditional knockouts that female rats display masculinized behavior. We will analyze their RNA-seq data from male and female rats with and without DNMT inhibitor treatment to relate the involvement of gene expression to differentially methylated regions found in females with and without estradiol therapy and male rats using their Whole Genome Bisulfite Sequencing (WGBS) data. We will conduct some exploratory analysis on both data through appropriate graphical visualization. After that to compare the different gene expressions and epigenetic characteristics we will use t-tests for two-groups (explicitly male and female) and ANOVA or analysis of variance (for more than two groups). Also if data permits some linear models will be checked for fitting to express the relationship in a formal way. 
+Genetic sex (XX vs. XY) has been held as the dominant sexual differentiation model, causing differentiation of the gonads, which secrete sex hormones, such as estradiol, to masculinize the brain. However, recent evidence suggests that environmental and epigenetic influences also contribute to sex differences. Enzymes such as methyltransferases influence the epigenome via the methylation of the genetic code. Male rats have lower DNA (cytosine-5)-methyltransferase 3A (DNMT3a) activity and DNA methylation than females. Nugent et al demonstrated using DNMT inhibitors or conditional knockouts that female rats display masculinized behavior. We will analyze their RNASeq data from male and female rats with and without DNMT inhibitor treatment to relate the involvement of gene expression to differentially methylated regions found in females with and without estradiol therapy and male rats using their Whole Genome Bisulfite Sequencing (WGBS) data. We will conduct some exploratory analysis on both data through appropriate graphical visualization. After that to compare the different gene expressions and epigenetic characteristics we will use t-tests for two-groups (explicitly male and female) and ANOVA or analysis of variance (for more than two groups). Also if data permits some linear models will be checked for fitting to express the relationship in a formal way. 
 
 **Motivation**
 ---------------
@@ -32,27 +32,27 @@ The paper by Nugent et al demonstrates that:
 * Some changes in gene expression are as a result of DNMT inhibition.
   + The authors did not, however, attempt to link these changes to their methylation data which is why we have selected to further evaluate this paper.
 
-**Objectives**
+**Objective**
 ----------
-Based on the data already collected from the paper we aim to:
+Find overlaps between differentially expressed genes (DEGs) and differentially methylated genes (DMRs) to reveal potential epigenetically-regulated genes involved in masculinization and feminization of the rat brain.
 
-1. Find epigenetically regulated genes that determine gender outcome (by comparing male and female)
-2. For each epigenetically regulated gene discovered in (1), determine which are changed by estradiol (testosterone) or DNMT inhibitor.
+**add image of venn**
 
 **The Data**
 --------------
-The data provided from the [paper](http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE66203) contains:
-* [RNA-seq](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/tree/master/RNASeq_data) - processed data with gene name and RPKM (Reads Per Kilobase of transcript per Million)   
- + Female x3
- + Female + DNMT inhibitor x3
- + Male x3
- + Male + DNMT inhibitor x3
-* [Whole Genome Bisulfite Sequencing (WGBS)](http://www.ncbi.nlm.nih.gov/bioproject/?term=275796) - DNA-methylation (~270 million raw reads) -  
- + Male x3
- + Female x3
- + Female + estradiol x3
+ 
+Table 2. The data provided from the [paper](http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE66203) contains [RNA-seq](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/tree/master/RNASeq_data) - processed data with gene name and RPKM (Reads Per Kilobase of transcript per Million) and [Whole Genome Bisulfite Sequencing (WGBS)](http://www.ncbi.nlm.nih.gov/bioproject/?term=275796) - DNA-methylation (~270 million raw reads), both taken from the preoptic area of the rat brain.
 
-**Methodology and Division of Labour** 
+ Sample |  RNASeq (Day 2) | WGBS (Day 4)
+--------|-----------------|-------------
+male | 3 replicates | 3 replicates merged into 1
+male treated with zebularine |	3 replicates | -
+female |	3 replicates | 3 replicates merged into 1
+female treated with zebularine  | 3 replicates | -
+female treated with estradiol |	- | 3 replicates merged into 1
+
+
+**Methodology and division of labour, with links to analysis and issues** 
 ---------------------------------------
 
 1. Firstly, [align WGBS reads and call methylation with bismark](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/issues/1) (**Tony**)
@@ -78,3 +78,30 @@ The data provided from the [paper](http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi
  + [Poster](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/issues/23) (**Emma L., Emma T., Tony, Rashed**)
  + [Bibliography](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/Final%20Deliverables/bibliography.md) (**Emma L.**)
 8. Methodological research for explanation of the various statistical tools and methods used in the project (**Rashed**)
+
+**Results** 
+---------------------------------------
+
+RNASeq data was provided in RPKM and it was also aligned to an outdated version 4 (2004) of the rat genome. Only one gene was found using this for DEG analysis, so read counts were regenerated SAILFISH for further analysis. For DEG analysis, methods used in R packages edgeR (glmFit & glmQLFit), NOISeq, DESeq and limma were all tested. glmQLFit (quasi-likelihood negative binomial model)  was selected to maximize sensitivity even at the cost of false discovery rate, as it gave the most DEGs, and better explained the data variation by incorporating two dispersions. The use of glmQLFit was further supported based on its overlap with DEGs detected by other methods. 
+
+Following RNAseq DEG analysis, 163 genes were differentially expressed between male and female rats and of these, 43 genes were found to be differentially expressed between females and zeb-treated females following the same masculinizing gene expression pattern.
+
+WGBS sanity checks revealed significantly fewer reads for one female sample files hosted on [NCBI SRA](http://trace.ncbi.nlm.nih.gov/Traces/study/?acc=SRP055171); the first author updated the data on request. The female rats also had a lower number of WGBS reads relative to the male and estradiol-treated females, and the WGBS data had low coverage overall, so the replicates for this dataset were merged. Using the merged data, 16308 DMRs were found between female and male rats in total, and after filtering DMRs that are promoters of other genes and those that are >150kb away from the nearest promoter of DEG genes of interest, 267 DMRs remain as putative gender regulating regions. 21465 DMRs were found between female and estradiol, and 100 of these overlapped with the DMRs found in females vs. males. The methylation of 99% of these regions were the same in male and estradiol-treated females. Of these 100 regions, 13 associated with genes that were differentially expressed across females vs. males and zeb-treated females. These are our ten potential epigenetically regulated genes involved in sex determination. 
+
+Table 3. Putative epigenetically regulated genes involved in sex determination found through DEG/DMR overlap analysis.
+
+gene | description | DMR annotation | distance to transcriptional start site | influence
+-----|-------------|----------------|----------------------------------------|----------
+Gipr |	gastric inhibitory polypeptide receptor	| promoter-TSS	| 456	| feminizing
+LOC100362027	| ribosomal protein L30-like	| intron	| -116711	| feminizing
+Fbxw10	| F-box and WD repeat domain containing 10	| exon	| -110780	| feminizing
+Tcf12	| transcription factor 12 |	intergenic	| 120886	| feminizing
+Plch1	| phospholipase C, eta 1 | intergenic	| 107433	| feminizing
+| | | intergenic	| 106442	| feminizing		
+| | | intergenic	| -143383	| feminizing		
+Vars |	valyl-tRNA synthetase	| intron |	-93035	| feminizing
+Foxj2	| forkhead box J2	| intron	| -54560	| feminizing
+Hsp90aa1	| heat shock protein 90aa1	| intergenic	| 103431	| masculinizing
+| | | intron |	80776	| masculinizing		
+Adcy6	| adenylate cyclase 6	| intron	| -138546	| masculinizing
+Tpp2	| tripeptidyl peptidase II	| intron |	-66157	| masculinizing

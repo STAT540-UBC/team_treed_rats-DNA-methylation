@@ -19,9 +19,13 @@ Our project is based on the paper ["Brain feminization requires active repressio
 
 Our [project proposal](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/Final%20Deliverables/originalproposal.md) gives the outline of the project.
 
-**Abstract**
+**Introduction**
 --------------
-Genetic sex (XX vs. XY) has been held as the dominant sexual differentiation model, causing differentiation of the gonads, which secrete sex hormones, such as estradiol, to masculinize the brain. However, recent evidence suggests that environmental and epigenetic influences also contribute to sex differences.[[1,2,3]](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/Final%20Deliverables/bibliography.md) Enzymes such as methyltransferases influence the epigenome via the methylation of the genetic code. Male rats have lower DNA (cytosine-5)-methyltransferase 3A (DNMT3a) activity and DNA methylation than females.[[1]](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/Final%20Deliverables/bibliography.md) Nugent et al demonstrated using DNMT inhibitors or conditional knockouts that female rats display masculinized behavior.[[1]](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/Final%20Deliverables/bibliography.md) We will analyze their RNASeq data from male and female rats with and without DNMT inhibitor treatment to relate the involvement of gene expression to differentially methylated regions found in females with and without estradiol therapy and male rats using their Whole Genome Bisulfite Sequencing (WGBS) data. 
+Genetic sex (XX vs. XY) has been held as the dominant sexual differentiation model, causing differentiation of the gonads, which secrete sex hormones, such as estradiol, to masculinize the brain. However, recent evidence suggests that environmental and epigenetic influences also contribute to sex differences.[[1,2,3]](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/Final%20Deliverables/bibliography.md) Enzymes such as methyltransferases influence the epigenome via the methylation of the genetic code. Male rats have lower DNA (cytosine-5)-methyltransferase 3A (DNMT3a) activity and DNA methylation than females.[[1]](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/Final%20Deliverables/bibliography.md) Nugent et al demonstrated using DNMT inhibitors or conditional knockouts that female rats display masculinized behavior.[[1]](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/Final%20Deliverables/bibliography.md) We used the raw reads generated from Nugent et al to find differentially expressed genes (DEGs) and differentially methylated regions (DMRs) between all conditions to identify gender-related genes that are epigenetically regulated.
+
+<img src="https://raw.githubusercontent.com/STAT540-UBC/team_treed_rats-DNA-methylation/master/Background_Research/rats_figure.png?token=APx5yAMWHcgkQaDqsYeneu6Y2M4TN2-Sks5XEG_CwA%3D%3D" width="450px" height="308px" />
+
+**Figure 1. Rat experiments carried out by Nugent et al to demonstrate behavioural changes in female rats upon treatment with estradiol or zebularine (zeb) a DNMT inhibitor.**
 
 **Motivation**
 ---------------
@@ -34,10 +38,10 @@ The paper by Nugent et al demonstrates that:
 
 **Objective**
 ----------
-Find overlaps between differentially expressed genes (DEGs) and differentially methylated genes (DMRs) (figure 1A) to reveal potential epigenetically-regulated genes involved in masculinization and feminization of the rat brain by looking for overlapping genes in samples (figure 1B).
+Find overlaps between differentially expressed genes (DEGs) and differentially methylated genes (DMRs) (figure 2A) to reveal potential epigenetically-regulated genes involved in masculinization and feminization of the rat brain by looking for overlapping genes in samples (figure 2B).
 
-**Figure 1. Strategy to (A) identify DEG/DMR overlap and (B) identify genes of interest for gender regulation.**
 ![](https://raw.githubusercontent.com/STAT540-UBC/team_treed_rats-DNA-methylation/master/Background_Research/figure_dmr_deg.png?token=APx5yDnzBXvjeTY4m0jLSqEuP0H5-oqYks5XEGj7wA%3D%3D)
+**Figure 2. Strategy to (A) identify DEG/DMR overlap and (B) identify genes of interest for gender regulation.**
 
 **The Data**
 --------------

@@ -25,14 +25,14 @@ Genetic sex (XX vs. XY) has been held as the dominant sexual differentiation mod
 
 <img src="https://raw.githubusercontent.com/STAT540-UBC/team_treed_rats-DNA-methylation/master/Background_Research/rats_figure.png?token=APx5yAMWHcgkQaDqsYeneu6Y2M4TN2-Sks5XEG_CwA%3D%3D" width="450px" height="308px" />
 
-**Figure 1. Rat experiments carried out by Nugent et al to demonstrate behavioural changes in female rats upon treatment with estradiol or zebularine (zeb) a DNMT inhibitor.**
+**Figure 1. Rat experiments carried out by Nugent et al to demonstrate behavioural changes in female rats upon treatment with estradiol or zebularine (zeb), a DNMT inhibitor.**
 
 **Motivation**
 ---------------
 The paper by Nugent et al demonstrates that: 
-* Male rats have lower DNMT3a activity and DNA methylation than females
-* Inhibiting DNMT masculinized neuronal markers and sexual behaviour in female rats, and has no effect on male behaviour. Females with conditional knockout of isoform DNMT3 also display male sexual behaviour  
-* Even outside of the restricted period of development where they are sensitive to hormone therapy, DNMT inhibition still masculinizes females 
+* Male rats have lower DNMT3a activity and DNA methylation than females.
+* Inhibiting DNMT masculinized neuronal markers and sexual behaviour in female rats, and has no effect on male behaviour. Females with conditional knockout of isoform DNMT3 also display male sexual behaviour.
+* Even outside of the restricted period of development where they are sensitive to hormone therapy, DNMT inhibition still masculinizes females.
 * Some changes in gene expression are as a result of DNMT inhibition.
   + The authors did not, however, attempt to link these changes to their methylation data which is why we have selected to further evaluate this paper.
 
@@ -61,29 +61,29 @@ female treated with estradiol |	- | 3 replicates merged into 1
 ---------------------------------------
 Methodology and division of labour, with links to analysis and issues:
 
-1. Firstly, [align WGBS reads and call methylation with bismark](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/issues/1) (**Tony**)
+1. Firstly, [align WGBS reads and call methylation with bismark](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/issues/1). (**Tony**)
 2. At the same time… 
- + [Find differentially methylated regions (DMR) between male vs female, and find nearest gene for each DMR](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/Data_Analysis/2-Calling_DMRs.md) using HOMER.[[4]](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/Final%20Deliverables/bibliography.md)- [issue](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/issues/8) (Tony)
+ + [Find differentially methylated regions (DMR) between male vs female, and find nearest gene for each DMR](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/Data_Analysis/2-Calling_DMRs.md) using HOMER.[[4]](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/Final%20Deliverables/bibliography.md)- [issue](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/issues/8). (Tony)
  + [RNA alignment](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/issues/24) with SAILFISH.[[5]](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/Final%20Deliverables/bibliography.md) (**Tony**)
- + [RNA-seq data file preparation for sanity check and analysis](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/tree/master/RNASeq_data) (**Rashed**)
- + [RNA sanity checks] (https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/Data_Analysis/1-RNA_Seq_Sanity_Check.md) - [issue](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/issues/17) (**Emma T., David**)
- + [Background research on differentially expressed genes between male vs female] (https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/issues/3) (**Rashed**)
- + [Find differentially expressed genes between male vs female](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/Data_Analysis/3-TPM_RNA_Seq_differential__expression.md) - [issue](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/issues/25) - [m/f DEG list](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/Data_Analysis/RNAseq_result/DE_genes/glmQLFit_DE_genes.tsv) (**Tony, Rashed**) 
-3. Generate a list of gene and region pairs by finding overlap between 2a and 2b. This list of gene/region pairs represent epigenetically regulated genes that are important for gender - [list of DEGs between f/m close to a convergent DMR](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/methylation_data/3-all_gene_associated_DMRs.tsv) (**Tony**)
+ + [RNA-seq data file preparation for sanity check and analysis](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/tree/master/RNASeq_data). (**Rashed**)
+ + [RNA sanity checks] (https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/Data_Analysis/1-RNA_Seq_Sanity_Check.md) - [issue](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/issues/17). (**Emma T., David**)
+ + [Background research on differentially expressed genes between male vs female] (https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/issues/3). (**Rashed**)
+ + [Find differentially expressed genes between male vs female](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/Data_Analysis/3-TPM_RNA_Seq_differential__expression.md) - [issue](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/issues/25) - [m/f DEG list](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/Data_Analysis/RNAseq_result/DE_genes/glmQLFit_DE_genes.tsv). (**Tony, Rashed**) 
+3. Generate a list of gene and region pairs by finding overlap between 2a and 2b. This list of gene/region pairs represent epigenetically regulated genes that are important for gender - [list of DEGs between f/m close to a convergent DMR](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/methylation_data/3-all_gene_associated_DMRs.tsv). (**Tony**)
 4. At the same time...
- + [Find DMRs between female and female + estradiol, and only consider DMRs that overlap or are <150Kb away from transcriptional start sites of genes in (3)](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/Data_Analysis/2-Calling_DMRs.md) - [issue] (https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/issues/29). [[6]](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/Final%20Deliverables/bibliography.md) (**Tony**)
- + [Find differentially expressed genes between female and female + DNMT inhibitor and only consider genes that overlap with (3)](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/Data_Analysis/3.1-DE_genes_femaleVSzeb.md) - [issue](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/issues/28) - [list of f/z-f DEGS](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/Data_Analysis/RNAseq_result/DE_genes/3.1-femVSfemZeb_allDE_genes.tsv.) - [list of f/z-f&m DEGs](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/Data_Analysis/RNAseq_result/DE_genes/3.1-femVSfemZeb_glmQLFit_DE_genes.tsv). (**Tony**)
-5. Select genes that overlap between 4a and 4b to form list of master list of gender genes that can be artificially altered via epigenetic reprogramming - [issue](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/issues/28) - [list of DEGs between f/m and f/fz close to a convergent DMR](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/methylation_data/3-DE_gene_associated_DMRs.tsv) (**Tony**)
+ + [Find DMRs between female and female + estradiol, and only consider DMRs that overlap or are <150Kb away from transcriptional start sites of genes in (3)](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/Data_Analysis/2-Calling_DMRs.md) - [issue] (https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/issues/29). [[6]](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/Final%20Deliverables/bibliography.md). (**Tony**)
+ + [Find differentially expressed genes between female and female + DNMT inhibitor and only consider genes that overlap with (3)](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/Data_Analysis/3.1-DE_genes_femaleVSzeb.md) - [issue](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/issues/28) - [list of f/z-f DEGS](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/Data_Analysis/RNAseq_result/DE_genes/3.1-femVSfemZeb_allDE_genes.tsv.) - [list of f/fz&m DEGs](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/Data_Analysis/RNAseq_result/DE_genes/3.1-femVSfemZeb_glmQLFit_DE_genes.tsv). (**Tony**)
+5. Select genes that overlap between 4a and 4b to form list of master list of gender genes that can be artificially altered via epigenetic reprogramming - [issue](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/issues/28) - [list of DEGs between f/m and f/fz close to a convergent DMR](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/methylation_data/3-DE_gene_associated_DMRs.tsv). (**Tony**)
 6. To conclude, and properly answer the biological question we will describe the biological relevance of genes in the master list in (5).
- + [Background research into rats, gender, epigenetics.](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/issues/16)  (**Emma L.**)
- + [For known genes, describe gene pathways and functions](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/issues/19) (using [GSEA](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/tree/master/Background_Research/GSEA), [UNIPROT](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/tree/master/Background_Research/annotation_Uniprot_lit)) (**Emma L**)
+ + [Background research into rats, gender, epigenetics.](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/issues/16).  (**Emma L.**)
+ + [For known genes, describe gene pathways and functions](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/issues/19) (using [GSEA](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/tree/master/Background_Research/GSEA), [UNIPROT](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/tree/master/Background_Research/annotation_Uniprot_lit)). (**Emma L**)
 7. Administrative tasks and preparation of deliverables:
- + [Project proposal](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/issues/6) - (**Everyone**)
- + Repo readme directories with arrangement (**Emma T., Emma L, Tony, Rashed**)
- + [Progress report](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/issues/20) (**Emma T.**)
- + [Poster](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/issues/23) (**Emma L., Emma T., Tony, Rashed**)
- + [Bibliography](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/Final%20Deliverables/bibliography.md) (**Emma L.**)
-8. Methodological research for explanation of the various statistical tools and methods used in the project (**Rashed**)
+ + [Project proposal](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/issues/6). (**Everyone**)
+ + Repo readme directories with arrangement. (**Emma L., Emma T, Tony, Rashed**)
+ + [Progress report](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/issues/20). (**Emma T.**)
+ + [Poster](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/issues/23). (**Emma L., Emma T., Tony, Rashed**)
+ + [Bibliography](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/Final%20Deliverables/bibliography.md). (**Emma L.**)
+8. Methodological research for explanation of the various statistical tools and methods used in the project. (**Rashed**)
 
 **Results** 
 ---------------------------------------
@@ -115,7 +115,7 @@ Tpp2	| tripeptidyl peptidase II	| intron |	-66157	| masculinizing
 **Discussion** 
 ---------------------------------------
 
-Our study presents a method for analysis of WGBS and RNASeq data to integrate DMRs and DEGs, and uses it to identify ten putative genes that determine sexual differentiation and behaviour and can be epigenetically regulated. Two of these genes, TCF12 and ADCY6, are already known to have have biological significance to neurology.[[8,9,10]](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/Final%20Deliverables/bibliography.md) Our findings provide insight into the mechanisms of gender, and may help explain non-heterosexual gender identities in mammals. 
+Our study presents a method for analysis of WGBS and RNASeq data to integrate DMRs and DEGs, and uses it to identify ten putative genes that determine sexual differentiation and behaviour and can be epigenetically regulated. Two of these genes, TCF12 and ADCY6, are already known to have have biological significance to neurology.[[8,9,10]](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/Final%20Deliverables/bibliography.md) TCF12, a transcriptional regulator involved in the initiation of neuronal differentiation was found to be both hypomethylated and upregulated in females relative to to males and masculinized females, suggesting it could be a epigenetically regulated feminizing gene.[[8]](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/Final%20Deliverables/bibliography.md) ADCY6 was both upregulated and associated with a hypomethylated DMR in males and masculinized females compared to vehicle females, making it a putative epigenetically regulated masculinizing gene. ADCY6 is an adenylate cyclase; this family of proteins catalyzes the formation of the signaling molecule cAMP and is known to be involved in intracellular signalling,[[9]](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/Final%20Deliverables/bibliography.md) and in developmentally and neurophysiologically relevant signaling pathways, including neural plasticity.[[10]](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/Final%20Deliverables/bibliography.md) Our findings provide insight into the mechanisms of gender, and may help explain non-heterosexual gender identities in mammals. 
 
 **Deliverables** 
 ---------------------------------------

@@ -5,7 +5,7 @@ This is the private repository of team **TREED** for their group project as part
 
 This is the repo for group project of **TEAM TREED**
 
-Table 1. Our team members: 
+**Table 1. Our team members:**
 
 Github ID |  Name
 ---------|------------
@@ -36,12 +36,12 @@ The paper by Nugent et al demonstrates that:
 ----------
 Find overlaps between differentially expressed genes (DEGs) and differentially methylated genes (DMRs) to reveal potential epigenetically-regulated genes involved in masculinization and feminization of the rat brain.
 
-**add image of venn**
+<img src="https://raw.githubusercontent.com/STAT540-UBC/team_treed_rats-DNA-methylation/master/Background_Research/objective_venn.png?token=APx5yMDozy6AQa2w3jEoyPB7d7q5Vbeiks5XEF4DwA%3D%3D" width="447px" height="371px" />
 
 **The Data**
 --------------
  
-Table 2. The data provided from the [paper](http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE66203) contains [RNA-seq](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/tree/master/RNASeq_data) - processed data with gene name and RPKM (Reads Per Kilobase of transcript per Million) and [Whole Genome Bisulfite Sequencing (WGBS)](http://www.ncbi.nlm.nih.gov/bioproject/?term=275796) - DNA-methylation (~270 million raw reads), both taken from the preoptic area of the rat brain.
+**Table 2. The data provided from the [paper](http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE66203) contains [RNA-seq](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/tree/master/RNASeq_data) - processed data with gene name and RPKM (Reads Per Kilobase of transcript per Million) and [Whole Genome Bisulfite Sequencing (WGBS)](http://www.ncbi.nlm.nih.gov/bioproject/?term=275796) - DNA-methylation (~270 million raw reads), both taken from the preoptic area of the rat brain.**
 
  Sample |  RNASeq (Day 2) | WGBS (Day 4)
 --------|-----------------|-------------
@@ -88,7 +88,7 @@ Following RNAseq DEG analysis, 163 genes were differentially expressed between m
 
 WGBS sanity checks revealed significantly fewer reads for one female sample files hosted on [NCBI SRA](http://trace.ncbi.nlm.nih.gov/Traces/study/?acc=SRP055171); the first author updated the data on request. The female rats also had a lower number of WGBS reads relative to the male and estradiol-treated females, and the WGBS data had low coverage overall, so the replicates for this dataset were merged. Using the merged data, 16308 DMRs were found between female and male rats in total, and after filtering DMRs that are promoters of other genes and those that are >150kb away from the nearest promoter of DEG genes of interest, 267 DMRs remain as putative gender regulating regions. 21465 DMRs were found between female and estradiol, and 100 of these overlapped with the DMRs found in females vs. males. The methylation of 99% of these regions were the same in male and estradiol-treated females. Of these 100 regions, 13 associated with genes that were differentially expressed across females vs. males and zeb-treated females. These are our ten potential epigenetically regulated genes involved in sex determination. 
 
-Table 3. Putative epigenetically regulated genes involved in sex determination found through DEG/DMR overlap analysis.
+**Table 3. Putative epigenetically regulated genes involved in sex determination found through DEG/DMR overlap analysis.**
 
 gene | description | DMR annotation | distance to transcriptional start site | influence
 -----|-------------|----------------|----------------------------------------|----------
@@ -105,3 +105,8 @@ Hsp90aa1	| heat shock protein 90aa1	| intergenic	| 103431	| masculinizing
 | | | intron |	80776	| masculinizing		
 Adcy6	| adenylate cyclase 6	| intron	| -138546	| masculinizing
 Tpp2	| tripeptidyl peptidase II	| intron |	-66157	| masculinizing
+
+**Discussion** 
+---------------------------------------
+
+Our study presents a method for analysis of WGBS and RNASeq data to integrate DMRs and DEGs, and uses it to identify ten putative genes that determine sexual differentiation and behaviour and can be epigenetically regulated. Two of these genes, TCF12 and ADCY6, are already known to have have biological significance to neurology.[[8,9,10]](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/Final%20Deliverables/bibliography.md) Our findings provide insight into the mechanisms of gender, and may help explain non-heterosexual gender identities in mammals. 

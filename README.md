@@ -44,7 +44,7 @@ Find overlaps between differentially expressed genes (DEGs) and differentially m
  
 **Table 2. The data provided from the [paper](http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE66203) contains [RNA-seq](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/tree/master/RNASeq_data) - processed data with gene name and RPKM (Reads Per Kilobase of transcript per Million) and [Whole Genome Bisulfite Sequencing (WGBS)](http://www.ncbi.nlm.nih.gov/bioproject/?term=275796) - DNA-methylation (~270 million raw reads), both taken from the preoptic area of the rat brain.**
 
- Sample |  RNASeq (Day 2) | WGBS (Day 4)
+ Sample |  [RNASeq](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/tree/master/RNASeq_data/new_data_Tony_TPM) (Day 2) | [WGBS](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/tree/master/methylation_data) (Day 4)
 --------|-----------------|-------------
 male | 3 replicates | 3 replicates merged into 1
 male treated with zebularine |	3 replicates | -
@@ -53,8 +53,9 @@ female treated with zebularine  | 3 replicates | -
 female treated with estradiol |	- | 3 replicates merged into 1
 
 
-**Methodology and division of labour, with links to analysis and issues** 
+**Analysis and tasks** 
 ---------------------------------------
+Methodology and division of labour, with links to analysis and issues:
 
 1. Firstly, [align WGBS reads and call methylation with bismark](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/issues/1) (**Tony**)
 2. At the same time… 

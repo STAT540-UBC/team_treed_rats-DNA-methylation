@@ -221,7 +221,7 @@ gExp <-
 # write.table(gExp, file = "../Data_Analysis/RNAseq_result/DE_genes/maleVSfemale_glmQLFit_DE_genes.tsv", row.names = F, col.names = T, quote = F, sep = "\t")
 ```
 
-## Compare vs NOIse-seq
+## Compare `edgeR` with the results obtained from `NOIseq`
 
 ```{r, warning=FALSE}
 rnaseq_samples <- rnaseq %>%select(contains("vehicle"))
@@ -232,20 +232,20 @@ noiseq_data <- readData(data = rnaseq_samples, factors = noiseq_factors)
 
 noiseq_results <- noiseqbio(input = noiseq_data, factor = "gender", norm = "tmm", filter = 1)
 
-noiseq_hits <- degenes(noiseq_results)
+NOISeq_hits <- degenes(noiseq_results)
 
 DE.plot(output = noiseq_results, q = 0.95, graphic = "expr")
 ```
 ```{r}
 x<-venn(list(
   edgeR_glmQLFit = edgeR_QL_results %>% subset(FDR<0.05) %>% rownames(.),
-  noiseSeq = rownames(noiseq_hits),
+  NOISeq = rownames(NOISeq_hits),
   edgeR_glmFit = edgeR_results %>% subset(FDR<0.05) %>% rownames(.)
 ))
 x <- attr(x, "intersection")
 ```
 
-## Noticed that `r length(x$noiseSeq)` genes are only called DE in `NOISeq`
+## Noticed that 15 genes are only called DE in `NOISeq`
 
 Let's take a look at these genes
 
@@ -253,14 +253,13 @@ Let's take a look at these genes
 full_data <- rnaseq_samples %>%
   DGEList(group = rep(c("f","m"), each = 3))
 
-cpm(full_data) %>% subset(rownames(.) %in% x$noiseSeq) %>% round(2) %>% kable("markdown")
+cpm(full_data) %>% subset(rownames(.) %in% x$`010`) %>% round(2) %>% kable("markdown")
 
-cpm(full_data) %>% subset(rownames(.) %in% x$noiseSeq) %>% 
-  pheatmap(scale = "row")
+cpm(full_data) %>% subset(rownames(.) %in% x$`010`) %>% pheatmap(scale = "row")
 ```
 
 Basically all of them are only expressed in one sample, which may be a technical artifact. AKA these genes are no good, and shouldn't be considered. 
 
 ## Grand conclusion
 
-Proceed with `glmQLFit` since it gives the most number of genes, presumably due to highest sensitivity
+We decide to proceed with `glmQLFit` since it gives the most number of genes, presumably due to highest sensitivity that we care most here for our further analysis. 

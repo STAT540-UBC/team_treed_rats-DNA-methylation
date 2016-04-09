@@ -37,10 +37,12 @@
   * Nonparametric method `NOISeq` (another `R` package)
   * Other conventional methods like `R` package `DESeq` and `limma` are also applied
 * Result
-  * We have found 317 DE genes among male vs female using `edgeR` with `glmQLFit`
-  * 109 DE genes using `NOISeq`, 
-  * and 61 DE genes using `edgeR` with `glmFit`
+  * We have found 164 DE genes among male vs female using `edgeR` with `glmQLFit`
+  * 45 DE genes using `NOISeq`, 15 DE genes using `limma`
+  * and 52 DE genes using `edgeR` with `glmFit`
 
 ### Differential Expression Analysis (Female vs FemaleZeb) (Tony) 
 [3.1-DE_genes_femaleVSzeb.md](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/Data_Analysis/3.1-DE_genes_femaleVSzeb.md)
 
+* Results
+  * 43 genes were found to be differentially expressed between females and zeb-treated females following the same masculinizing gene expression pattern using `edgeR` with `glmQLFit`

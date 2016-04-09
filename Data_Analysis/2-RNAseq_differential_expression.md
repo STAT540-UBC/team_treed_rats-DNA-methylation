@@ -1,5 +1,5 @@
 # 2-RNAseq_differential_expression
-Tony Hui  and Rashed
+Tony Hui and Rashed  
 March 8, 2016  
 
 
@@ -117,7 +117,7 @@ plot(clustering)
 
 Seems like everything is normal, although there doesn't seem to be a clear separation between male and female
 
-## Try edgeR
+## Try edgeR with usual Negative Binomial fit
 
 
 ```r
@@ -175,7 +175,6 @@ qplot(edgeR_results$PValue, geom="density")
 ```
 
 ![](2-RNAseq_differential_expression_files/figure-html/unnamed-chunk-9-1.png)
-
 
 ## Try edgeR with Negative Binomial quasi-likelihood(QL) fit
 
@@ -286,12 +285,12 @@ right_join(rn6_gene, edgeR_QL_results %>% add_rownames("gene"), by = "gene")  %>
 
 |gene                 |V7      |      logFC|   logCPM|           LR|    PValue|       FDR|
 |:--------------------|:-------|----------:|--------:|------------:|---------:|---------:|
-|ENSRNOT00000088593.1 |Eif2s3y | 14.0854776| 5.053390| 1481.2322968| 0.0000000| 0.0000000|
-|ENSRNOT00000082648.1 |Uty     | 12.2375307| 3.214705|  456.0808041| 0.0000000| 0.0000000|
+|ENSRNOT00000088593.1 |Eif2s3y | 14.0854776| 5.053390| 1481.2322963| 0.0000000| 0.0000000|
+|ENSRNOT00000082648.1 |Uty     | 12.2375307| 3.214705|  456.0808043| 0.0000000| 0.0000000|
 |ENSRNOT00000092019.1 |Eif2s3  | -0.6675812| 7.769330|   48.0627248| 0.0000000| 0.0000000|
 |ENSRNOT00000082421.1 |Eif2s3  | -1.2963958| 1.077961|    8.8985483| 0.0028540| 0.2480257|
-|ENSRNOT00000081124.1 |Eif2s3  | -0.2888773| 3.162468|    1.4936701| 0.2216479| 0.9999733|
-|ENSRNOT00000043543.2 |Rps4y2  | -0.0252202| 2.446263|    0.0075271| 0.9308630| 0.9999733|
+|ENSRNOT00000081124.1 |Eif2s3  | -0.2888773| 3.162468|    1.4936701| 0.2216479| 0.9999732|
+|ENSRNOT00000043543.2 |Rps4y2  | -0.0252202| 2.446263|    0.0075271| 0.9308630| 0.9999732|
 
 Looks like some of cannonical genes are differentially expressed. Yay!
 
@@ -332,7 +331,7 @@ gExp <-
 # write.table(gExp, file = "../Data_Analysis/RNAseq_result/DE_genes/maleVSfemale_glmQLFit_DE_genes.tsv", row.names = F, col.names = T, quote = F, sep = "\t")
 ```
 
-## Compare vs NOIse-seq
+## Compare `edgeR` with the results obtained from `NOIseq`
 
 
 ```r
@@ -379,14 +378,14 @@ noiseq_results <- noiseqbio(input = noiseq_data, factor = "gender", norm = "tmm"
 ## [1] 15
 ## Computing Z for noise...
 ## Computing probability of differential expression...
-## p0 = 0.602640939155569
+## p0 = 0.602640939155568
 ## Probability
 ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
 ##   0.000   0.129   0.410   0.392   0.659   1.000    5875
 ```
 
 ```r
-noiseq_hits <- degenes(noiseq_results)
+NOISeq_hits <- degenes(noiseq_results)
 ```
 
 ```
@@ -406,7 +405,7 @@ DE.plot(output = noiseq_results, q = 0.95, graphic = "expr")
 ```r
 x<-venn(list(
   edgeR_glmQLFit = edgeR_QL_results %>% subset(FDR<0.05) %>% rownames(.),
-  noiseSeq = rownames(noiseq_hits),
+  NOISeq = rownames(NOISeq_hits),
   edgeR_glmFit = edgeR_results %>% subset(FDR<0.05) %>% rownames(.)
 ))
 ```
@@ -426,7 +425,7 @@ Let's take a look at these genes
 full_data <- rnaseq_samples %>%
   DGEList(group = rep(c("f","m"), each = 3))
 
-cpm(full_data) %>% subset(rownames(.) %in% x$noiseSeq) %>% round(2) %>% kable("markdown")
+cpm(full_data) %>% subset(rownames(.) %in% x$`010`) %>% round(2) %>% kable("markdown")
 ```
 
 
@@ -450,8 +449,7 @@ cpm(full_data) %>% subset(rownames(.) %in% x$noiseSeq) %>% round(2) %>% kable("m
 |ENSRNOT00000090390.1 |             0.00|             0.00|             0.00|           0.00|           0.20|           0.00|
 
 ```r
-cpm(full_data) %>% subset(rownames(.) %in% x$noiseSeq) %>% 
-  pheatmap(scale = "row")
+cpm(full_data) %>% subset(rownames(.) %in% x$`010`) %>% pheatmap(scale = "row")
 ```
 
 ![](2-RNAseq_differential_expression_files/figure-html/unnamed-chunk-20-1.png)
@@ -460,4 +458,4 @@ Basically all of them are only expressed in one sample, which may be a technical
 
 ## Grand conclusion
 
-Proceed with `glmQLFit` since it gives the most number of genes, presumably due to highest sensitivity
+We decide to proceed with `glmQLFit` since it gives the most number of genes, presumably due to highest sensitivity that we care most here for our further analysis. 

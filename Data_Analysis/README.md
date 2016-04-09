@@ -42,5 +42,5 @@
   * and 61 DE genes using `edgeR` with `glmFit`
 
 ### Differential Expression Analysis (Female vs FemaleZeb) (Tony) 
-[3_-_DE_genes_femaleVSfemaleZeb.md](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/Data_Analysis/3_-_DE_genes_femaleVSfemaleZeb.md)
+[3.1-DE_genes_femaleVSzeb.md](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/Data_Analysis/3.1-DE_genes_femaleVSzeb.md)
 

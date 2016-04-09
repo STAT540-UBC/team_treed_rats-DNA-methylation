@@ -57,9 +57,9 @@ female treated with zebularine  | 3 replicates | -
 female treated with estradiol |	- | 3 replicates merged into 1
 
 
-**Analysis and tasks** 
+**Analysis and tasks directory** 
 ---------------------------------------
-Methodology and division of labour, with links to analysis and issues:
+[Methodology](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/Data_Analysis/methods.md) with division of labour, and links to analysis and issues:
 
 1. Firstly, [align WGBS reads and call methylation with bismark](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/issues/1). (**Tony**)
 2. At the same time… 
@@ -85,7 +85,7 @@ Methodology and division of labour, with links to analysis and issues:
  + [Bibliography](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/Final%20Deliverables/bibliography.md). (**Emma L.**)
 8. Methodological research for explanation of the various statistical tools and methods used in the project. (**Rashed**)
 
-**Results** 
+**[Results](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/Data_Analysis/README.md)** 
 ---------------------------------------
 
 RNASeq data was provided in RPKM and it was also aligned to an outdated version 4 (2004) of the rat genome. Only one gene was found using this for DEG analysis, so read counts were regenerated SAILFISH for further analysis. For DEG analysis, methods used in R packages edgeR (glmFit & glmQLFit), NOISeq, DESeq and limma were all tested. glmQLFit (quasi-likelihood negative binomial model)  was selected to maximize sensitivity even at the cost of false discovery rate, as it gave the most DEGs, and better explained the data variation by incorporating two dispersions. The use of glmQLFit was further supported based on its overlap with DEGs detected by other methods. 
@@ -116,10 +116,17 @@ Tpp2	| tripeptidyl peptidase II	| intron |	-66157	| masculinizing
 ---------------------------------------
 
 Our study presents a method for analysis of WGBS and RNASeq data to integrate DMRs and DEGs, and uses it to identify ten putative genes that determine sexual differentiation and behaviour and can be epigenetically regulated. Two of these genes, TCF12 and ADCY6, are already known to have have biological significance to neurology.[[8,9,10]](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/Final%20Deliverables/bibliography.md) TCF12, a transcriptional regulator involved in the initiation of neuronal differentiation was found to be both hypomethylated and upregulated in females relative to to males and masculinized females, suggesting it could be a epigenetically regulated feminizing gene.[[8]](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/Final%20Deliverables/bibliography.md) ADCY6 was both upregulated and associated with a hypomethylated DMR in males and masculinized females compared to vehicle females, making it a putative epigenetically regulated masculinizing gene. ADCY6 is an adenylate cyclase; this family of proteins catalyzes the formation of the signaling molecule cAMP and is known to be involved in intracellular signalling,[[9]](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/Final%20Deliverables/bibliography.md) and in developmentally and neurophysiologically relevant signaling pathways, including neural plasticity.[[10]](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/Final%20Deliverables/bibliography.md) Our findings provide insight into the mechanisms of gender, and may help explain non-heterosexual gender identities in mammals. 
+ 
+**Useful links**
+----------------
+ + [RNASeq data](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/tree/master/RNASeq_data/new_data_Tony_TPM) (Day 2)
+ + [WGBS data](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/tree/master/methylation_data)
+ + [Methods](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/Data_Analysis/methods.md)
+ + [Result outputs](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/Data_Analysis/README.md)
 
 **Deliverables** 
 ---------------------------------------
  + [Project proposal](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/Final%20Deliverables/originalproposal.md)
  + [Progress report](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/Final%20Deliverables/Progress_Report.md)
- + [Bibliography](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/Final%20Deliverables/bibliography.md)
  + [Poster](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/Final%20Deliverables/poster_treed.pdf)
+ + [Bibliography](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/Final%20Deliverables/bibliography.md)

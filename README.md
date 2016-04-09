@@ -119,7 +119,7 @@ Our study presents a method for analysis of WGBS and RNASeq data to integrate DM
  
 **Useful links**
 ----------------
- + [RNASeq data](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/tree/master/RNASeq_data/new_data_Tony_TPM) (Day 2)
+ + [RNASeq data](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/tree/master/RNASeq_data/new_data_Tony_TPM)
  + [WGBS data](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/tree/master/methylation_data)
  + [Methods](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/Data_Analysis/methods.md)
  + [Result outputs](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/Data_Analysis/README.md)

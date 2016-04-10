@@ -18,14 +18,12 @@
   * Merge all raw data files obtained after alignment with SAILFISH (done by Tony) in two ways for sanity check and differential expression analysis  
   * [Find the merged files with raw files](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/tree/master/RNASeq_data/new_data_Tony_TPM)
 
-### Sanity Checking RNAseq Data (Emma and David) 
-[1-RNA_Seq_Sanity_Check.md](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/Data_Analysis/1-RNA_Seq_Sanity_Check.md)
+### Sanity Checking RNAseq Sailfish Data (Emma T) 
+[1-RNA_Seq_Sanity_Check.md](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/Data_Analysis/Sailfish_Sanity_Checks.md)
 * Motivation 
  * Same as with methylation data, the RNAseq data must be checked for any obvious anomalies or problems.
 * Results 
- * A lot of genes were found to have an RPKM value of 0.
- * Replications in each group were highly correlated with one another. There is one particular sample that looks to be less correlated, although when actually looking at the values 0.97 correlation is good. Based on this, the gene was decided to be kept in. 
-
+ * Replications in each group were highly correlated with one another. There is one particular sample that looks to be less correlated, although when actually looking at the values 0.97 correlation is good. Based on this, the gene was decided to be kept in and replicates not merged. 
 
  
 ### Differential Expression Analysis (Male vs Female) (Tony and Rashed) 
@@ -36,13 +34,12 @@
   *`edgeR` (`R` package) with usual negative binomial fitting and quasi-likelihood negative binomial fitting
   * Nonparametric method `NOISeq` (another `R` package)
   * Other conventional methods like `R` package `DESeq` and `limma` are also applied
-* Result
-  * We have found 164 DE genes among male vs female using `edgeR` with `glmQLFit`
-  * 45 DE genes using `NOISeq`, 15 DE genes using `limma`
-  * and 52 DE genes using `edgeR` with `glmFit`
+* Results
+  * We have found 163 differentially expressed genes between male vs female using all of the techniques. 
+  * glmQLFit was selected to maximize sensitivity even at the cost of false discovery rate, as these would later be correlated with the methylation data aswell.
+
 
 ### Differential Expression Analysis (Female vs FemaleZeb) (Tony) 
 [3.1-DE_genes_femaleVSzeb.md](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/Data_Analysis/3.1-DE_genes_femaleVSzeb.md)
-
 * Results
-  * 43 genes were found to be differentially expressed between females and zeb-treated females following the same masculinizing gene expression pattern using `edgeR` with `glmQLFit`
+  * 53 genes were found to be differentially expressed between females and zeb-treated females that overlap with the 163 genes found to be differentially expressed between male and female. following the same masculinizing gene expression pattern using `edgeR` with `glmQLFit`. 

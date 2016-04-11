@@ -30,17 +30,6 @@
 [2-RNAseq_differential_expression.md](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/Data_Analysis/2-RNAseq_differential_expression.md)
 * Motivation
   * The RNAseq data (raw counts) is used here for finding differentially expressed (DE) genes among male and female
-* Methods
-  * Call DMRs by merging the top 1% differentially methylated CpGs together into regions with 3 or more CpGs
-  * Overlap f/m and f/fz DMRs together
-  * Associate to nearest DE gene using HOMER
-* Results
-  * There are 13 regions that associated with genes that are DE in all conditions, and 42 regions that only associated with genes that are DE between male and female
-
-### Finding DMRs and associating to nearest DE gene 
-[2-Calling_DMRs.md](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/Data_Analysis/2-Calling_DMRs.md)
-* Motivation
-  * CpG methylation is used to call Differentially Methylated regions for associating to differentially expressed genes
 * Different methods applied 
   *`edgeR` (`R` package) with usual negative binomial fitting and quasi-likelihood negative binomial fitting
   * Nonparametric method `NOISeq` (another `R` package)
@@ -48,6 +37,18 @@
 * Results
   * We have found 163 differentially expressed genes between male vs female using all of the techniques. 
   * glmQLFit was selected to maximize sensitivity even at the cost of false discovery rate, as these would later be correlated with the methylation data aswell.
+
+### Finding DMRs and associating to nearest DE gene 
+[2-Calling_DMRs.md](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/Data_Analysis/2-Calling_DMRs.md)
+* Motivation
+  * CpG methylation is used to call Differentially Methylated regions for associating to differentially expressed genes
+* Methods
+  * Call DMRs by merging the top 1% differentially methylated CpGs together into regions with 3 or more CpGs
+  * Overlap f/m and f/fz DMRs together
+  * Associate to nearest DE gene using HOMER
+* Results
+  * There are 13 regions that associated with genes that are DE in all conditions, and 42 regions that only associated with genes that are DE between male and female
+
 
 ### Differential Expression Analysis (Female vs FemaleZeb) (Tony) 
 [3.1-DE_genes_femaleVSzeb.md](https://github.com/STAT540-UBC/team_treed_rats-DNA-methylation/blob/master/Data_Analysis/3.1-DE_genes_femaleVSzeb.md)
